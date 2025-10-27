@@ -3,21 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Services\FirebaseService;
 
 class ProductController extends Controller
 {
-    protected $productModel;
+    protected $firebase;
 
-    public function __construct()
+    public function __construct(FirebaseService $firebase)
     {
-        $this->productModel = new Product();
+        $this->firebase = $firebase;
     }
 
     public function index()
     {
-        $products = $this->productModel->all();
+        $products = $this->firebase->getAll('products');
         return view('admin.products.index', compact('products'));
     }
 
@@ -28,25 +28,37 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $this->productModel->create($request->all());
-        return redirect()->route('products.index');
+        $request->validate([
+            'name'=>'required',
+            'price'=>'required|numeric',
+        ]);
+
+        $this->firebase->getRef('products')->push($request->only('name','price'));
+
+        return redirect()->route('products.index')->with('success','Product added.');
     }
 
     public function edit($id)
     {
-        $product = $this->productModel->find($id);
-        return view('admin.products.edit', compact('product', 'id'));
+        $product = $this->firebase->getRef('products/'.$id)->getValue();
+        return view('admin.products.edit', compact('product','id'));
     }
 
     public function update(Request $request, $id)
     {
-        $this->productModel->update($id, $request->all());
-        return redirect()->route('products.index');
+        $request->validate([
+            'name'=>'required',
+            'price'=>'required|numeric',
+        ]);
+
+        $this->firebase->getRef('products/'.$id)->update($request->only('name','price'));
+
+        return redirect()->route('products.index')->with('success','Product updated.');
     }
 
     public function destroy($id)
     {
-        $this->productModel->delete($id);
-        return redirect()->route('products.index');
+        $this->firebase->getRef('products/'.$id)->remove();
+        return redirect()->route('products.index')->with('success','Product deleted.');
     }
 }

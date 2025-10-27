@@ -3,23 +3,29 @@
 namespace App\Services;
 
 use Kreait\Firebase\Factory;
-use Kreait\Firebase\Database;
 
 class FirebaseService
 {
-    protected Database $database;
+    protected $database;
 
     public function __construct()
     {
         $factory = (new Factory)
-            ->withServiceAccount(storage_path('app/firebase_credentials.json'))
-            ->withDatabaseUri('https://hydronova-f2401-default-rtdb.firebaseio.com');
+            ->withServiceAccount(storage_path('firebase_credentials.json'))
+            ->withDatabaseUri('https://hydronova-f2401-default-rtdb.firebaseio.com/'); // <-- Correct URL
 
         $this->database = $factory->createDatabase();
     }
 
-    public function database(): Database
+    public function getAll($collection)
     {
-        return $this->database;
+        $ref = $this->database->getReference($collection);
+        $data = $ref->getValue();
+        return $data ?? [];
+    }
+
+    public function getRef($collection)
+    {
+        return $this->database->getReference($collection);
     }
 }

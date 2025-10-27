@@ -1,34 +1,47 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MainController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\PlanController;
 
-// Admin Controllers
-use App\Http\Controllers\Admin\PlanController as AdminPlanController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
+// -------------------
+// Public Pages
+// -------------------
+Route::get('/', [MainController::class, 'index'])->name('main.index');
+Route::get('/products', [MainController::class, 'products'])->name('main.products');
+Route::get('/plans', [MainController::class, 'plans'])->name('main.plans');
 
-// Frontend Controllers
-use App\Http\Controllers\PlansController;
-use App\Http\Controllers\ProductsController;
+// -------------------
+// Admin Login
+// -------------------
+Route::get('/admin/login', [AdminController::class,'login'])->name('admin.login');
+Route::post('/admin/login', [AdminController::class,'checkLogin'])->name('admin.checkLogin');
 
-// -----------------------------
-// FRONTEND ROUTES
-// -----------------------------
-Route::get('/', function () {
-    return view('admin.dashboard');
-})->name('admin.dashboard');
+// -------------------
+// Protected Admin Routes
+// -------------------
+Route::middleware('auth.admin')->group(function(){
 
-// Plans
-Route::get('/plans', [PlansController::class, 'index'])->name('plans.index');
-Route::get('/plans/{id}', [PlansController::class, 'show'])->name('plans.show');
+    // Dashboard
+    Route::get('/admin/dashboard', [AdminController::class,'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/logout', [AdminController::class,'logout'])->name('admin.logout');
 
-// Products
-Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
-Route::get('/products/{id}', [ProductsController::class, 'show'])->name('products.show');
+    // Product CRUD
+    Route::get('/admin/products', [ProductController::class,'index'])->name('admin.products.index');
+    Route::get('/admin/products/create', [ProductController::class,'create'])->name('admin.products.create');
+    Route::post('/admin/products', [ProductController::class,'store'])->name('admin.products.store');
+    Route::get('/admin/products/{id}/edit', [ProductController::class,'edit'])->name('admin.products.edit');
+    Route::put('/admin/products/{id}', [ProductController::class,'update'])->name('admin.products.update');
+    Route::delete('/admin/products/{id}', [ProductController::class,'destroy'])->name('admin.products.destroy');
 
-// -----------------------------
-// ADMIN ROUTES
-// -----------------------------
-Route::prefix('admin')->group(function () {
-    Route::resource('plans', AdminPlanController::class);
-    Route::resource('products', AdminProductController::class);
+    // Plan CRUD
+    Route::get('/admin/plans', [PlanController::class,'index'])->name('admin.plans.index');
+    Route::get('/admin/plans/create', [PlanController::class,'create'])->name('admin.plans.create');
+    Route::post('/admin/plans', [PlanController::class,'store'])->name('admin.plans.store');
+    Route::get('/admin/plans/{id}/edit', [PlanController::class,'edit'])->name('admin.plans.edit');
+    Route::put('/admin/plans/{id}', [PlanController::class,'update'])->name('admin.plans.update');
+    Route::delete('/admin/plans/{id}', [PlanController::class,'destroy'])->name('admin.plans.destroy');
+
 });

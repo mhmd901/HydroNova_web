@@ -1,34 +1,36 @@
-@extends('layouts.admin')
+@extends('layouts.app')
+
+@section('title', 'Manage Plans')
 
 @section('content')
-<h1>All Plans</h1>
-<a href="{{ route('plans.create') }}">Add New Plan</a>
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($plans as $id => $plan)
-        <tr>
-            <td>{{ $id }}</td>
-            <td>{{ $plan['name'] ?? '' }}</td>
-            <td>{{ $plan['price'] ?? '' }}</td>
-            <td>
-                <a href="{{ route('plans.edit', $id) }}">Edit</a> |
-                <form action="{{ route('plans.destroy', $id) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit">Delete</button>
-                </form> |
-                <a href="{{ route('plans.show', $id) }}">View</a>
-            </td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
+    <h2>Plans</h2>
+    <a href="{{ route('admin.plans.create') }}">Add New Plan</a>
+
+    <table border="1" cellpadding="5">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($plans as $plan)
+            <tr>
+                <td>{{ $plan->id }}</td>
+                <td>{{ $plan->name }}</td>
+                <td>{{ $plan->price }}</td>
+                <td>
+                    <a href="{{ route('admin.plans.edit', $plan->id) }}">Edit</a>
+                    <form action="{{ route('admin.plans.destroy', $plan->id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 @endsection

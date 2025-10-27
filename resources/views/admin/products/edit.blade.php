@@ -1,16 +1,19 @@
-@extends('layouts.admin')
+@extends('layouts.app')
+
+@section('title', 'Edit Product')
 
 @section('content')
-<h1>Edit Product</h1>
-<form action="{{ route('products.update', $id) }}" method="POST">
+<h2>Edit Product</h2>
+
+<form action="{{ route('admin.products.update', $id) }}" method="POST">
     @csrf
     @method('PUT')
-    <label>Name:</label><br>
-    <input type="text" name="name" value="{{ $product['name'] ?? '' }}" required><br><br>
-    <label>Price:</label><br>
-    <input type="number" name="price" value="{{ $product['price'] ?? '' }}" required><br><br>
-    <label>Description:</label><br>
-    <textarea name="description">{{ $product['description'] ?? '' }}</textarea><br><br>
+    <label>Name:</label>
+    <input type="text" name="name" value="{{ $product['name'] }}" required>
+    <br><br>
+    <label>Price:</label>
+    <input type="number" name="price" value="{{ $product['price'] }}" required>
+    <br><br>
     <button type="submit">Update</button>
 </form>
 @endsection
