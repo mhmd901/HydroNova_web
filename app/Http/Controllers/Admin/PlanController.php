@@ -29,36 +29,40 @@ class PlanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'=>'required',
-            'price'=>'required|numeric',
+            'name' => 'required',
+            'price' => 'required|numeric',
         ]);
 
-        $this->firebase->getRef('plans')->push($request->only('name','price'));
+        $this->firebase->getRef('plans')->push($request->only('name', 'price'));
 
-        return redirect()->route('plans.index')->with('success','Plan added.');
+        // ✅ Fixed redirect route
+        return redirect()->route('admin.plans.index')->with('success', 'Plan added successfully.');
     }
 
     public function edit($id)
     {
-        $plan = $this->firebase->getRef('plans/'.$id)->getValue();
-        return view('admin.plans.edit', compact('plan','id'));
+        $plan = $this->firebase->getRef('plans/' . $id)->getValue();
+        return view('admin.plans.edit', compact('plan', 'id'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name'=>'required',
-            'price'=>'required|numeric',
+            'name' => 'required',
+            'price' => 'required|numeric',
         ]);
 
-        $this->firebase->getRef('plans/'.$id)->update($request->only('name','price'));
+        $this->firebase->getRef('plans/' . $id)->update($request->only('name', 'price'));
 
-        return redirect()->route('plans.index')->with('success','Plan updated.');
+        // ✅ Fixed redirect route
+        return redirect()->route('admin.plans.index')->with('success', 'Plan updated successfully.');
     }
 
     public function destroy($id)
     {
-        $this->firebase->getRef('plans/'.$id)->remove();
-        return redirect()->route('plans.index')->with('success','Plan deleted.');
+        $this->firebase->getRef('plans/' . $id)->remove();
+
+        // ✅ Fixed redirect route
+        return redirect()->route('admin.plans.index')->with('success', 'Plan deleted successfully.');
     }
 }

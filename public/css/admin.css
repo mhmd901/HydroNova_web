@@ -1,0 +1,179 @@
+/* 🌊 HydroNova Admin — Modern Medium-Light Theme */
+/* ------------------------------------------------------ */
+
+/* Base setup */
+body {
+  background: linear-gradient(135deg, #d7f3f5, #aee1e6);
+  color: #1c1c1c;
+  font-family: 'Poppins', sans-serif;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  background: #f8f9fa;
+  border-right: 1px solid #ced4da;
+  min-height: 100vh;
+  padding: 20px 0;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.06);
+}
+.sidebar .nav-link {
+  color: #004852;
+  font-weight: 500;
+  padding: 12px 18px;
+  border-radius: 10px;
+  margin: 5px 10px;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+.sidebar .nav-link i {
+  margin-right: 8px;
+  font-size: 1.2rem;
+}
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background: #00a9b9;
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(0, 169, 185, 0.3);
+}
+
+/* Header bar */
+.header {
+  background: #fdfefe;
+  border-bottom: 1px solid #e3e3e3;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  padding: 14px 24px;
+}
+.header h1 {
+  font-size: 1.6rem;
+  color: #003b46;
+  font-weight: 700;
+}
+
+/* Cards */
+.card {
+  background: #fefefe;
+  border: 1px solid #e5e5e5;
+  border-radius: 18px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  color: #2b2b2b;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+.card h5 {
+  color: #005d63;
+  font-weight: 600;
+}
+
+/* Statistic numbers */
+.stat-number {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #008b9a;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+.btn-outline-dark {
+  border-color: #00a9b9;
+  color: #004c52;
+}
+.btn-outline-dark:hover {
+  background: #00a9b9;
+  color: #fff;
+}
+.btn-outline-success {
+  border-color: #2e8b57;
+  color: #2e8b57;
+}
+.btn-outline-success:hover {
+  background: #2e8b57;
+  color: #fff;
+}
+.btn-outline-primary {
+  border-color: #0d6efd;
+  color: #0d6efd;
+}
+.btn-outline-primary:hover {
+  background: #0d6efd;
+  color: #fff;
+}
+.btn-outline-danger {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+.btn-outline-danger:hover {
+  background: #dc3545;
+  color: #fff;
+}
+.btn-info {
+  background: #00a9b9;
+  border: none;
+}
+.btn-info:hover {
+  background: #008b9a;
+}
+
+/* Tables & lists */
+.table {
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.table th {
+  background: #e1f5f7;
+  color: #003b46;
+}
+.table td {
+  vertical-align: middle;
+}
+.list-group-item {
+  background: #fafafa;
+  border: none;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+/* Alerts */
+.alert {
+  border-radius: 10px;
+  font-weight: 500;
+}
+.alert-success {
+  background: #d2f0e1;
+  color: #146b45;
+  border: none;
+}
+.alert-danger {
+  background: #ffe0e0;
+  color: #9a0c0c;
+  border: none;
+}
+
+/* Quick Actions section */
+.quick-actions {
+  background: #f5fcfd;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  padding: 30px;
+}
+.quick-actions h4 {
+  color: #003b46;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 18px;
+  color: #555;
+  font-size: 0.9rem;
+  margin-top: 40px;
+  background: rgba(255, 255, 255, 0.6);
+}

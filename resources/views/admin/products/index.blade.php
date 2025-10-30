@@ -1,36 +1,42 @@
-@extends('layouts.app')
-
-@section('title', 'Manage Products')
+@extends('layouts.admin')
 
 @section('content')
-    <h2>Products</h2>
-    <a href="{{ route('admin.products.create') }}">Add New Product</a>
+<div class="container py-4">
+  <h2 class="fw-bold mb-4"><i class="bi bi-box-seam text-info"></i> Products</h2>
 
-    <table border="1" cellpadding="5">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($products as $product)
-            <tr>
-                <td>{{ $product->id }}</td>
-                <td>{{ $product->name }}</td>
-                <td>{{ $product->price }}</td>
-                <td>
-                    <a href="{{ route('admin.products.edit', $product->id) }}">Edit</a>
-                    <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+  <a href="{{ route('admin.products.create') }}" class="btn btn-outline-success mb-3">
+    <i class="bi bi-plus-circle"></i> Add Product
+  </a>
+
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Price ($)</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @forelse($products as $id => $product)
+        <tr>
+          <td>{{ $product['name'] ?? 'Unnamed' }}</td>
+          <td>${{ $product['price'] ?? '0.00' }}</td>
+          <td class="text-end">
+            <a href="{{ route('admin.products.edit', $id) }}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <form action="{{ route('admin.products.destroy', $id) }}" method="POST" class="d-inline">
+              @csrf @method('DELETE')
+              <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this product?')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+      @empty
+        <tr><td colspan="3" class="text-center text-muted">No products available.</td></tr>
+      @endforelse
+    </tbody>
+  </table>
+</div>
 @endsection

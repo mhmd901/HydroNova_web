@@ -1,0 +1,65 @@
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f7f3 100%);
+  color: #1b1b1b;
+  padding-bottom: 70px; /* Space for bottom nav */
+}
+
+/* Hero */
+.hero {
+  background: url('../images/hero_bg.jpg') center/cover no-repeat;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.4);
+}
+
+.hero span {
+  color: #4ef2c3;
+}
+
+/* Feature cards */
+.feature-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  transition: transform 0.3s;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Bottom Navbar */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0a2e33;
+  height: 70px;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.25);
+  z-index: 1000;
+}
+
+.bottom-nav .nav-item {
+  color: #e0f7f3;
+  text-decoration: none;
+  text-align: center;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.bottom-nav .nav-item i {
+  display: block;
+  font-size: 1.4rem;
+  margin-bottom: 3px;
+}
+
+.bottom-nav .nav-item.active,
+.bottom-nav .nav-item:hover {
+  color: #4ef2c3;
+}

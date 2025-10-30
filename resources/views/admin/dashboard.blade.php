@@ -1,68 +1,48 @@
-@extends('layouts.app')
-
-@section('title', 'Admin Dashboard')
+@extends('layouts.admin')
 
 @section('content')
-<h2>Admin Dashboard</h2>
-<p>Manage Products and Plans</p>
+<div class="container-fluid py-4">
+  <h2 class="fw-bold mb-3"><i class="bi bi-house-door text-info"></i> Dashboard</h2>
+  <p class="text-secondary mb-4">Monitor products, plans, and settings in one place.</p>
 
-<div style="margin-bottom: 20px;">
-    <a class="btn btn-add" href="{{ route('admin.products.create') }}">Add Product</a>
-    <a class="btn btn-add" href="{{ route('admin.plans.create') }}">Add Plan</a>
+  {{-- Stats --}}
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card p-4 text-center">
+        <h5>Total Products</h5>
+        <div class="stat-number">{{ isset($products) ? count($products) : 0 }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-4 text-center">
+        <h5>Total Plans</h5>
+        <div class="stat-number">{{ isset($plans) ? count($plans) : 0 }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-4 text-center">
+        <h5>Settings</h5>
+        <a href="{{ route('admin.settings') }}" class="btn btn-info text-white mt-2">
+          <i class="bi bi-pencil-square"></i> Edit Admin Info
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {{-- Quick Actions --}}
+  <div class="card quick-actions mt-4">
+    <h4><i class="bi bi-lightning-charge text-info"></i> Quick Actions</h4>
+    <div class="mt-3 d-flex flex-wrap gap-3">
+      <a href="{{ route('admin.products.create') }}" class="btn btn-outline-dark">
+        <i class="bi bi-plus-circle"></i> Add Product
+      </a>
+      <a href="{{ route('admin.plans.create') }}" class="btn btn-outline-success">
+        <i class="bi bi-diagram-3"></i> Add Plan
+      </a>
+      <a href="{{ route('admin.settings') }}" class="btn btn-outline-primary">
+        <i class="bi bi-gear"></i> Settings
+      </a>
+    </div>
+  </div>
 </div>
-
-<h3>Products</h3>
-@if(!empty($products))
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Price</th>
-        <th>Actions</th>
-    </tr>
-    @foreach($products as $id => $product)
-    <tr>
-        <td>{{ $product['name'] ?? '' }}</td>
-        <td>${{ $product['price'] ?? 0 }}</td>
-        <td>
-            <a class="btn btn-edit" href="{{ route('admin.products.edit', $id) }}">Edit</a>
-            <form action="{{ route('admin.products.destroy', $id) }}" method="POST" style="display:inline;">
-                @csrf
-                @method('DELETE')
-                <button class="btn btn-delete" type="submit">Delete</button>
-            </form>
-        </td>
-    </tr>
-    @endforeach
-</table>
-@else
-<p>No products yet.</p>
-@endif
-
-<h3>Plans</h3>
-@if(!empty($plans))
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Price</th>
-        <th>Actions</th>
-    </tr>
-    @foreach($plans as $id => $plan)
-    <tr>
-        <td>{{ $plan['name'] ?? '' }}</td>
-        <td>${{ $plan['price'] ?? 0 }}</td>
-        <td>
-            <a class="btn btn-edit" href="{{ route('admin.plans.edit', $id) }}">Edit</a>
-            <form action="{{ route('admin.plans.destroy', $id) }}" method="POST" style="display:inline;">
-                @csrf
-                @method('DELETE')
-                <button class="btn btn-delete" type="submit">Delete</button>
-            </form>
-        </td>
-    </tr>
-    @endforeach
-</table>
-@else
-<p>No plans yet.</p>
-@endif
-
 @endsection
