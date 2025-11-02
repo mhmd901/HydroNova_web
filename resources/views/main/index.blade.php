@@ -15,7 +15,7 @@
 {{-- About Section --}}
 <section id="about" class="py-5 bg-light text-dark text-center">
   <div class="container" data-aos="fade-up" data-aos-delay="200">
-    <h2 class="fw-bold mb-3">About <span class="text-primary">HydroNova</span></h2>
+    <h2 class="fw-bold mb-3">about <span class="text-primary">HydroNova</span></h2>
     <p class="text-muted mb-5">
       HydroNova merges innovation, sustainability, and smart technology to transform how we treat and manage water.
       From AI-powered filtration to IoT monitoring — we deliver the future of clean water.
