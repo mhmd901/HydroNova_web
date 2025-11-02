@@ -48,6 +48,7 @@ Thumbs.db
 
 # Never commit your Firebase key file!
 /storage/app/firebase_credentials.json
+/storage/firebase_credentials.json
 
 # ============================
 # Frontend Builds (if any)

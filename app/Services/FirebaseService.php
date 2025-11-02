@@ -10,9 +10,11 @@ class FirebaseService
 
     public function __construct()
     {
+        $credentialsPath = env('FIREBASE_CREDENTIALS', storage_path('app/firebase_credentials.json'));
+
         $factory = (new Factory)
-            ->withServiceAccount(storage_path('firebase_credentials.json'))
-            ->withDatabaseUri('https://hydronova-f2401-default-rtdb.firebaseio.com/'); // <-- Correct URL
+            ->withServiceAccount($credentialsPath)
+            ->withDatabaseUri('https://hydronova-f2401-default-rtdb.firebaseio.com/');
 
         $this->database = $factory->createDatabase();
     }
