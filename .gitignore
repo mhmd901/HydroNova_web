@@ -1,19 +1,93 @@
-/.phpunit.cache
-/node_modules
-/public/build
-/public/hot
+# ============================
+# Laravel & PHP Defaults
+# ============================
+
+/vendor/
+/node_modules/
 /public/storage
 /storage/*.key
-/vendor
 .env
-.env.backup
-.env.production
+.env.*
+.idea
 .phpunit.result.cache
-Homestead.json
 Homestead.yaml
-auth.json
+Homestead.json
 npm-debug.log
 yarn-error.log
-/.fleet
-/.idea
-/.vscode
+
+# ============================
+# Laravel Caches & Compiled Files
+# ============================
+
+/bootstrap/cache/*
+!bootstrap/cache/.gitignore
+
+/storage/app/public
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+/storage/debugbar
+
+# ============================
+# Local Environment Files
+# ============================
+
+.env
+.env.local
+.env.backup
+.env.production
+/.vscode/
+/.DS_Store
+Thumbs.db
+
+# ============================
+# Firebase Credentials (IMPORTANT)
+# ============================
+
+# Never commit your Firebase key file!
+/storage/app/firebase_credentials.json
+
+# ============================
+# Frontend Builds (if any)
+# ============================
+
+/public/js/app.js.map
+/public/css/app.css.map
+/public/mix-manifest.json
+
+# ============================
+# Temporary & IDE Files
+# ============================
+
+/*.log
+*.log
+*.bak
+*.tmp
+*.swp
+*.swo
+/.vscode/
+/.idea/
+/.env.php
+
+# ============================
+# Compiled Frontend Builds
+# ============================
+
+/public/hot
+/public/js/*
+/public/css/*
+!/public/js/bootstrap.js
+!/public/css/admin.css
+!/public/css/style.css
+/public/build
+
+# ============================
+# Backup & Misc Files
+# ============================
+
+/*.sql
+/*.zip
+/*.rar
+/*.tar.gz
