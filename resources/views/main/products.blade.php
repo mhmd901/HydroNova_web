@@ -1,107 +1,58 @@
 @extends('layouts.app')
 
+@section('title', 'Products - HydroNova')
+
 @section('content')
-<section class="products-section py-5 text-center text-dark">
-  <div class="container">
-    <h2 class="fw-bold mb-4">Our <span class="text-primary">Products</span></h2>
-    <p class="text-muted mb-5">Explore HydroNova’s smart water solutions powered by sustainable technology.</p>
+<div class="container py-5">
+    <h2 class="text-center mb-5 fw-bold text-teal">Our Products</h2>
 
     <div class="row g-4">
-      @if(!empty($products))
-        @foreach($products as $id => $product)
-          <div class="col-md-4" data-id="{{ $id }}">
-            <div class="card product-card border-0 shadow-lg h-100 overflow-hidden">
-              <div class="image-wrapper position-relative">
-                <img src="{{ $product['image'] ?? asset('images/hero_bg.jpg') }}" 
-                     class="card-img-top product-image" alt="{{ $product['name'] ?? 'Product' }}">
-                <button class="favorite-btn" onclick="toggleFavorite('{{ $id }}')">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-              <div class="card-body">
-                <h5 class="fw-bold text-dark">{{ $product['name'] ?? 'Unnamed Product' }}</h5>
-                <p class="text-muted small">Smart IoT-enabled water technology designed for efficiency and impact.</p>
-                <h5 class="text-primary fw-bold mb-3">${{ $product['price'] ?? '0' }}</h5>
-                <a href="#contact" class="btn btn-outline-primary rounded-pill">Learn More</a>
-              </div>
+        @forelse ($products as $id => $product)
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <img src="{{ $product['image_url'] ?? asset('images/hydronova_logo.png') }}" 
+                         class="card-img-top" 
+                         alt="{{ $product['name'] ?? 'Product' }}" 
+                         style="object-fit: cover; height: 220px;">
+                    <div class="card-body">
+                        <h5 class="card-title fw-semibold">{{ $product['name'] ?? 'Unnamed Product' }}</h5>
+                        <p class="text-muted mb-1">${{ number_format((float)($product['price'] ?? 0), 2) }}</p>
+                        <p class="small text-secondary">{{ \Illuminate\Support\Str::limit($product['description'] ?? '', 120) }}</p>
+
+                        <form action="{{ route('cart.add') }}" method="POST" class="mt-3" data-add-to-cart-form>
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $id }}">
+                            <input type="hidden" name="name" value="{{ $product['name'] ?? 'Unnamed Product' }}">
+                            <input type="hidden" name="price" value="{{ $product['price'] ?? 0 }}">
+                            <input type="hidden" name="image" value="{{ $product['image_url'] ?? asset('images/hydronova_logo.png') }}">
+                            <button class="btn btn-teal w-100 shadow-sm">
+                                <i class="bi bi-cart-plus"></i> Add to Cart
+                            </button>
+                        </form>
+
+                        @if (!empty($product['model_url']))
+                            <button class="btn btn-outline-primary w-100 mt-2 shadow-sm"
+                                    onclick="init3DViewer(@json(route('stl.show', $id)))"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modelViewerModal"
+                                    data-model-url="{{ route('stl.show', $id) }}">
+                                <i class="bi bi-cube"></i> View in 3D
+                            </button>
+                        @else
+                            <button class="btn btn-secondary w-100 mt-2" disabled>
+                                <i class="bi bi-ban"></i> No 3D Model
+                            </button>
+                        @endif
+                    </div>
+                </div>
             </div>
-          </div>
-        @endforeach
-      @else
-        <p class="text-muted">No products available at this time.</p>
-      @endif
+        @empty
+            <p class="text-center text-muted">No products available yet.</p>
+        @endforelse
     </div>
-  </div>
-</section>
+</div>
 
-<style>
-  .product-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background: rgba(255,255,255,0.9);
-    border-radius: 16px;
-  }
-  .product-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  }
-  .image-wrapper {
-    position: relative;
-    overflow: hidden;
-  }
-  .product-image {
-    transition: transform 0.4s ease;
-  }
-  .product-card:hover .product-image {
-    transform: scale(1.05);
-  }
-  .favorite-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(255,255,255,0.8);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
-  }
-  .favorite-btn i {
-    color: #ff4b5c;
-    font-size: 1.2rem;
-  }
-  .favorite-btn.active {
-    background: #ff4b5c;
-  }
-  .favorite-btn.active i {
-    color: #fff;
-  }
-</style>
+{{-- Shared 3D viewer modal and scripts --}}
+@include('components.3dviewer')
 
-<script>
-  // Handle Favorites using localStorage
-  const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-
-  function toggleFavorite(id) {
-    const index = favorites.indexOf(id);
-    if (index > -1) favorites.splice(index, 1);
-    else favorites.push(id);
-
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    updateFavoriteIcons();
-  }
-
-  function updateFavoriteIcons() {
-    document.querySelectorAll('.product-card').forEach(card => {
-      const id = card.parentElement.dataset.id;
-      const btn = card.querySelector('.favorite-btn');
-      if (favorites.includes(id)) btn.classList.add('active');
-      else btn.classList.remove('active');
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', updateFavoriteIcons);
-</script>
 @endsection

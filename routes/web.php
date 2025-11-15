@@ -1,10 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MainController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\MainController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\StlController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +17,24 @@ use App\Http\Controllers\Admin\PlanController;
 Route::get('/', [MainController::class, 'index'])->name('main.index');
 Route::get('/products', [MainController::class, 'products'])->name('main.products');
 Route::get('/plans', [MainController::class, 'plans'])->name('main.plans');
+Route::get('/contact', [MainController::class, 'contact'])->name('main.contact');
+Route::post('/contact', [MainController::class, 'submitContact'])->name('main.contact.submit');
+Route::get('/stl/{id}', [StlController::class, 'show'])->name('stl.show');
+
+/*
+|--------------------------------------------------------------------------
+| Cart & Checkout
+|--------------------------------------------------------------------------
+*/
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+Route::post('/checkout/submit', [OrderController::class, 'submit'])->name('checkout.submit');
+Route::get('/thankyou', [OrderController::class, 'thankyou'])->name('thankyou');
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +68,13 @@ Route::middleware('auth.admin')->group(function () {
     Route::get('/admin/plans/{id}/edit', [PlanController::class, 'edit'])->name('admin.plans.edit');
     Route::put('/admin/plans/{id}', [PlanController::class, 'update'])->name('admin.plans.update');
     Route::delete('/admin/plans/{id}', [PlanController::class, 'destroy'])->name('admin.plans.destroy');
+
+    // Orders management
+    Route::get('/admin/orders', [OrderController::class, 'adminIndex'])->name('admin.orders.index');
+    Route::get('/admin/orders/{orderKey}', [OrderController::class, 'adminShow'])->name('admin.orders.show');
+    Route::get('/admin/orders/{orderKey}/edit', [OrderController::class, 'adminEdit'])->name('admin.orders.edit');
+    Route::put('/admin/orders/{orderKey}', [OrderController::class, 'adminUpdate'])->name('admin.orders.update');
+    Route::delete('/admin/orders/{orderKey}', [OrderController::class, 'adminDestroy'])->name('admin.orders.destroy');
 
     // Settings
     Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');

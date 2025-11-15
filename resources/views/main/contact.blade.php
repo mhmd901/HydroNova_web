@@ -42,10 +42,17 @@
                 <textarea name="message" id="message" rows="5" class="form-control border-info" required></textarea>
               </div>
 
-              <div class="text-end mt-4">
-                <button type="submit" class="btn btn-primary px-4">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4">
+                <button type="submit" class="btn btn-primary px-4 w-100 w-md-auto">
                   <i class="bi bi-send"></i> Send Message
                 </button>
+                <a href="https://wa.me/96181370450?text=Hello%20HydroNova%2C%20I%20have%20a%20question"
+                   target="_blank"
+                   rel="noopener"
+                   class="btn w-100 w-md-auto text-white"
+                   style="background-color:#25D366;">
+                  <i class="bi bi-whatsapp"></i> Message us on WhatsApp
+                </a>
               </div>
             </form>
           </div>

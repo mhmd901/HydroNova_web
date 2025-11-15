@@ -1,127 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HydroNova – Smart Water Technology</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'HydroNova - Smart Water Technology')</title>
 
-  {{-- 🌐 Bootstrap 5 --}}
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+        crossorigin="anonymous"
+    >
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-  {{-- 💎 Bootstrap Icons --}}
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --teal: #2DAA9E;
+            --teal-dark: #218d83;
+        }
 
-  {{-- ✨ Custom CSS --}}
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f8f9fa;
-      color: #212529;
-      padding-bottom: 120px; /* Space for navbar */
-      scroll-behavior: smooth;
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f7f9fb;
+            color: #212529;
+            padding-top: 90px;
+        }
 
-    /* 🌊 Refined Bottom Navbar */
-    .bottom-nav {
-      position: fixed;
-      bottom: 30px; /* add margin bottom */
-      left: 50%;
-      transform: translateX(-50%);
-      width: 70%; /* smaller width */
-      max-width: 500px;
-      background: #033f4c;
-      border-radius: 40px;
-      padding: 10px 0;
-      z-index: 1000;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-      transition: all 0.3s ease;
-    }
+        .navbar-brand img {
+            height: 42px;
+        }
 
-    .nav-item {
-      text-decoration: none;
-      color: #f1f1f1;
-      text-align: center;
-      flex: 1;
-      transition: all 0.3s ease;
-    }
+        .navbar {
+            background: #ffffff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
 
-    .nav-item i {
-      font-size: 1.3rem;
-      display: block;
-      margin-bottom: 3px;
-    }
+        .text-teal {
+            color: var(--teal) !important;
+        }
 
-    .nav-item span {
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
+        .btn-teal {
+            background: var(--teal);
+            color: #fff;
+            border: none;
+        }
 
-    .nav-item:hover {
-      color: #0dcaf0;
-      transform: translateY(-3px);
-    }
+        .btn-teal:hover,
+        .btn-teal:focus {
+            background: var(--teal-dark);
+            color: #fff;
+        }
 
-    .nav-item.active {
-      color: #00c9a7;
-    }
-
-    @media (max-width: 576px) {
-      .bottom-nav {
-        width: 90%;
-        bottom: 15px;
-        padding: 8px 0;
-      }
-      .nav-item i {
-        font-size: 1.2rem;
-      }
-      .nav-item span {
-        font-size: 0.7rem;
-      }
-    }
-
-    /* 🌌 Smooth Fade Animation */
-    body.fade-in {
-      animation: fadeIn 0.7s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+        .cart-badge {
+            position: absolute;
+            top: 2px;
+            right: -8px;
+            background: #dc3545;
+            color: #fff;
+            border-radius: 12px;
+            padding: 0 6px;
+            font-size: 0.75rem;
+        }
+    </style>
 </head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('main.index') }}">
+                <img src="{{ asset('images/hydronova_logo.png') }}" alt="HydroNova">
+                <span class="fw-bold text-teal">HydroNova</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('main.index') ? 'text-teal fw-semibold' : '' }}" href="{{ route('main.index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('main.products') ? 'text-teal fw-semibold' : '' }}" href="{{ route('main.products') }}">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('main.plans') ? 'text-teal fw-semibold' : '' }}" href="{{ route('main.plans') }}">Plans</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('main.contact') ? 'text-teal fw-semibold' : '' }}" href="{{ route('main.contact') }}">Contact</a>
+                    </li>
+                    @php
+                        $cartItems = session('cart', []);
+                        $navCartCount = array_sum(array_map(fn ($item) => $item['quantity'] ?? 0, $cartItems));
+                    @endphp
+                    <li class="nav-item ms-lg-3 position-relative">
+                        <a class="nav-link position-relative" href="{{ route('cart.index') }}" aria-label="View cart">
+                            <i class="bi bi-cart3 fs-5"></i>
+                            <span class="cart-badge" data-cart-count>{{ $navCartCount }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-<body class="fade-in">
+    <main>
+        @yield('content')
+    </main>
 
-  <main class="pb-5">
-    @yield('content')
-  </main>
-
-  {{-- 🌊 Compact Bottom Navbar --}}
-  <nav class="bottom-nav shadow-lg">
-    <a href="{{ route('main.index') }}" 
-       class="nav-item {{ request()->routeIs('main.index') ? 'active' : '' }}">
-       <i class="bi bi-house-door"></i>
-       <span>Home</span>
-    </a>
-
-    <a href="{{ route('main.products') }}" 
-       class="nav-item {{ request()->routeIs('main.products') ? 'active' : '' }}">
-       <i class="bi bi-droplet"></i>
-       <span>Products</span>
-    </a>
-
-    <a href="{{ route('main.plans') }}" 
-       class="nav-item {{ request()->routeIs('main.plans') ? 'active' : '' }}">
-       <i class="bi bi-box"></i>
-       <span>Plans</span>
-    </a>
-  </nav>
-
-  {{-- 🚀 Bootstrap JS --}}
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"
+    ></script>
+    <script src="{{ asset('js/cart.js') }}"></script>
+    @yield('scripts')
 </body>
 </html>

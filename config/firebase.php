@@ -51,8 +51,20 @@ return [
              */
 
            'credentials' => [
-    'file' => env('FIREBASE_CREDENTIALS'),
-],
+                'file' => (function () {
+                    $path = env('FIREBASE_CREDENTIALS');
+                    if (!$path) {
+                        return null; // Let SDK attempt auto-discovery or other config
+                    }
+                    // If already absolute (Unix or Windows), return as-is
+                    if (preg_match('/^(?:[A-Za-z]:[\\\\\/]|\/)/', $path)) {
+                        return $path;
+                    }
+                    // Prefer resolving relative paths against base_path
+                    $candidate = base_path($path);
+                    return $candidate;
+                })(),
+            ],
 
 
             /*

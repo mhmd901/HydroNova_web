@@ -10,7 +10,9 @@ class FirebaseService
 
     public function __construct()
     {
-        $credentialsPath = env('FIREBASE_CREDENTIALS', storage_path('app/firebase_credentials.json'));
+        // Prefer config value (works with config:cache), fallback to default storage path
+        $credentialsPath = config('firebase.projects.app.credentials.file')
+            ?: storage_path('app/firebase_credentials.json');
 
         $factory = (new Factory)
             ->withServiceAccount($credentialsPath)
