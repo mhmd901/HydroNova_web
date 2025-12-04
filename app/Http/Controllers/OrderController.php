@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Services\FirebaseService;
 use App\Traits\ManagesCart;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -133,6 +135,7 @@ class OrderController extends Controller
 
         $this->firebase->getRef("orders/{$orderKey}")->set($orderRecord);
         $this->forgetCart();
+        session()->forget('cart');
 
         session([
             'latest_order_key'  => $orderKey,
@@ -148,14 +151,39 @@ class OrderController extends Controller
     public function thankyou(): View
     {
         $order = session('latest_order_data');
+        $orderKey = session('latest_order_key');
 
-        if (!$order && session()->has('latest_order_key')) {
-            $order = $this->findOrder(session('latest_order_key'));
+        if (!$order && $orderKey) {
+            $order = $this->findOrder($orderKey);
         }
 
         return view('main.thankyou', [
-            'order' => $order,
+            'order'    => $order,
+            'orderKey' => $order['key'] ?? $orderKey,
         ]);
+    }
+
+    /**
+     * Generate a downloadable PDF invoice for a specific order.
+     */
+    public function downloadInvoice(string $id): Response|RedirectResponse
+    {
+        $order = $this->findOrder($id) ?? $this->findOrderByPublicId($id);
+
+        if (!$order) {
+            return redirect()
+                ->route('thankyou')
+                ->with('invoice_error', 'We could not find that order to generate an invoice.');
+        }
+
+        $safeFileId = preg_replace('/[^A-Za-z0-9_-]/', '', $order['id'] ?? $order['key'] ?? $id);
+        $fileName = sprintf('HydroNova_Invoice_%s.pdf', $safeFileId ?: 'order');
+
+        $pdf = Pdf::loadView('main.invoice', [
+            'order' => $order,
+        ])->setPaper('a4');
+
+        return $pdf->download($fileName);
     }
 
     /**
@@ -300,5 +328,32 @@ class OrderController extends Controller
         $snapshot['key'] = $orderKey;
 
         return $snapshot;
+    }
+
+    /**
+     * Retrieve an order by its public ID (e.g., #1234).
+     *
+     * @return array<string, mixed>|null
+     */
+    private function findOrderByPublicId(string $orderId): ?array
+    {
+        $ordersSnapshot = $this->firebase->getRef('orders')->getValue();
+
+        if (!$ordersSnapshot || !is_array($ordersSnapshot)) {
+            return null;
+        }
+
+        foreach ($ordersSnapshot as $key => $order) {
+            if (!is_array($order)) {
+                continue;
+            }
+
+            if (($order['id'] ?? null) === $orderId || $key === $orderId) {
+                $order['key'] = $key;
+                return $order;
+            }
+        }
+
+        return null;
     }
 }

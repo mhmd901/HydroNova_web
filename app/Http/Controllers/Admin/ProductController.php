@@ -3,242 +3,182 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\FirebaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Services\FirebaseService;
 
 class ProductController extends Controller
 {
-    protected $firebase;
+    protected FirebaseService $firebase;
 
     public function __construct(FirebaseService $firebase)
     {
         $this->firebase = $firebase;
     }
 
-    /**
-     * List products.
-     */
     public function index()
     {
         try {
             $products = $this->firebase->getAll('products') ?? [];
-            return view('admin.products.index', compact('products'));
         } catch (\Throwable $e) {
-            return view('admin.products.index', ['products' => []])
-                ->with('error', 'Failed to load products: ' . $e->getMessage());
+            return view('admin.products.index', ['products' => []])->with('error', $e->getMessage());
         }
+
+        return view('admin.products.index', compact('products'));
     }
 
-    /**
-     * Show create form.
-     */
     public function create()
     {
         return view('admin.products.create');
     }
 
-    /**
-     * Store a new product.
-     */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name'        => 'required|string|max:150',
-            'price'       => 'required|numeric',
+            'price'       => 'required|numeric|min:0',
             'description' => 'nullable|string|max:2000',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
-            'model_3d'    => [
-                'nullable',
-                'file',
-                'max:51200',
-                function ($attribute, $file, $fail) {
-                    if ($file) {
-                        $ext = strtolower($file->getClientOriginalExtension());
-                        if (!in_array($ext, ['stl', 'obj', 'glb'])) {
-                            $fail('The model 3d must be a file of type: stl, obj, glb.');
-                        }
-                    }
-                },
-            ],
+            'model_3d'    => 'nullable|file|mimes:stl|max:204800',
         ]);
 
         $imagePath = null;
-        $imageUrl  = null;
         $modelPath = null;
-        $modelUrl  = null;
 
         try {
-            // Product image upload
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('products/images', 'public');
-                $imageUrl  = asset('storage/' . $imagePath);
             }
 
-            // 3D model upload
             if ($request->hasFile('model_3d')) {
-                $modelPath = $request->file('model_3d')->store('products/models', 'public');
-                $modelUrl  = asset('storage/' . $modelPath);
+                $modelPath = $request->file('model_3d')->store('models', 'public');
             }
 
-            $payload = [
-                'name'        => $request->name,
-                'price'       => (float) $request->price,
-                'description' => $request->description,
-                'image_url'   => $imageUrl,
+            $this->firebase->getRef('products')->push([
+                'name'        => $validated['name'],
+                'price'       => (float) $validated['price'],
+                'description' => $validated['description'] ?? null,
                 'image_path'  => $imagePath,
-                'model_url'   => $modelUrl,
-                'model_path'  => $modelPath,
+                'image_url'   => $imagePath ? asset('storage/' . $imagePath) : null,
+                'model_3d'    => $modelPath,
+                'model_3d_url'=> $this->modelUrl($modelPath),
                 'created_at'  => now()->toDateTimeString(),
-            ];
+            ]);
 
-            $this->firebase->getRef('products')->push($payload);
-
-            return redirect()->route('admin.products.index')
-                             ->with('success', 'Product created successfully.');
+            return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
         } catch (\Throwable $e) {
-            // Clean up uploaded files on failure
-            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-            }
-            if ($modelPath && Storage::disk('public')->exists($modelPath)) {
-                Storage::disk('public')->delete($modelPath);
-            }
+            $this->deleteFile($imagePath);
+            $this->deleteFile($modelPath);
 
-            return redirect()->back()->withInput()
-                ->with('error', 'Failed to create product: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Failed to create product: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Show edit form.
-     */
-    public function edit($id)
+    public function edit(string $id)
     {
         try {
             $product = $this->firebase->getRef('products/' . $id)->getValue();
-
-            if (!$product) {
-                return redirect()->route('admin.products.index')
-                                 ->with('error', 'Product not found.');
-            }
-
-            return view('admin.products.edit', compact('product', 'id'));
         } catch (\Throwable $e) {
-            return redirect()->route('admin.products.index')
-                             ->with('error', 'Failed to load product: ' . $e->getMessage());
+            return redirect()->route('admin.products.index')->with('error', 'Failed to load product: ' . $e->getMessage());
         }
+
+        if (!$product) {
+            return redirect()->route('admin.products.index')->with('error', 'Product not found.');
+        }
+
+        return view('admin.products.edit', compact('product', 'id'));
     }
 
-    /**
-     * Update a product.
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, string $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name'        => 'required|string|max:150',
-            'price'       => 'required|numeric',
+            'price'       => 'required|numeric|min:0',
             'description' => 'nullable|string|max:2000',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
-            'model_3d'    => [
-                'nullable',
-                'file',
-                'max:51200',
-                function ($attribute, $file, $fail) {
-                    if ($file) {
-                        $ext = strtolower($file->getClientOriginalExtension());
-                        if (!in_array($ext, ['stl', 'obj', 'glb'])) {
-                            $fail('The model 3d must be a file of type: stl, obj, glb.');
-                        }
-                    }
-                },
-            ],
+            'model_3d'    => 'nullable|file|mimes:stl|max:204800',
         ]);
 
         try {
             $ref      = $this->firebase->getRef('products/' . $id);
             $existing = $ref->getValue();
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Failed to update product: ' . $e->getMessage());
+        }
 
-            if (!$existing) {
-                return redirect()->route('admin.products.index')
-                                 ->with('error', 'Product not found.');
-            }
+        if (!$existing) {
+            return redirect()->route('admin.products.index')->with('error', 'Product not found.');
+        }
 
-            // Start with existing values
-            $imagePath = $existing['image_path'] ?? null;
-            $imageUrl  = $existing['image_url']  ?? null;
-            $modelPath = $existing['model_path'] ?? null;
-            $modelUrl  = $existing['model_url']  ?? null;
+        $imagePath = $existing['image_path'] ?? null;
+        $modelPath = $existing['model_3d'] ?? null;
+        $imageUrl  = $existing['image_url'] ?? null;
+        $modelUrl  = $existing['model_3d_url'] ?? null;
 
-            // Replace image if uploaded
+        try {
             if ($request->hasFile('image')) {
-                if ($imagePath && Storage::disk('public')->exists($imagePath)) {
-                    Storage::disk('public')->delete($imagePath);
-                }
+                $this->deleteFile($imagePath);
                 $imagePath = $request->file('image')->store('products/images', 'public');
                 $imageUrl  = asset('storage/' . $imagePath);
+            } elseif ($imagePath) {
+                $imageUrl = asset('storage/' . $imagePath);
             }
 
-            // Replace model if uploaded
             if ($request->hasFile('model_3d')) {
-                if ($modelPath && Storage::disk('public')->exists($modelPath)) {
-                    Storage::disk('public')->delete($modelPath);
-                }
-                $modelPath = $request->file('model_3d')->store('products/models', 'public');
-                $modelUrl  = asset('storage/' . $modelPath);
+                $this->deleteFile($modelPath);
+                $modelPath = $request->file('model_3d')->store('models', 'public');
+                $modelUrl  = $this->modelUrl($modelPath);
+            } elseif ($modelPath) {
+                $modelUrl = $this->modelUrl($modelPath);
             }
 
-            $payload = [
-                'name'        => $request->name,
-                'price'       => (float) $request->price,
-                'description' => $request->description,
-                'image_url'   => $imageUrl,
+            $ref->update([
+                'name'        => $validated['name'],
+                'price'       => (float) $validated['price'],
+                'description' => $validated['description'] ?? null,
                 'image_path'  => $imagePath,
-                'model_url'   => $modelUrl,
-                'model_path'  => $modelPath,
+                'image_url'   => $imageUrl,
+                'model_3d'    => $modelPath,
+                'model_3d_url'=> $modelUrl,
                 'updated_at'  => now()->toDateTimeString(),
-            ];
+            ]);
 
-            $ref->update($payload);
-
-            return redirect()->route('admin.products.index')
-                             ->with('success', 'Product updated successfully.');
+            return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
         } catch (\Throwable $e) {
-            return redirect()->back()->withInput()
-                           ->with('error', 'Failed to update product: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Failed to update product: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Delete a product.
-     */
-    public function destroy($id)
+    public function destroy(string $id)
     {
         try {
             $ref      = $this->firebase->getRef('products/' . $id);
             $existing = $ref->getValue();
-
-            if (!$existing) {
-                return redirect()->route('admin.products.index')
-                                 ->with('error', 'Product not found.');
-            }
-
-            // Clean up stored image
-            if (!empty($existing['image_path']) && Storage::disk('public')->exists($existing['image_path'])) {
-                Storage::disk('public')->delete($existing['image_path']);
-            }
-            // Clean up stored model
-            if (!empty($existing['model_path']) && Storage::disk('public')->exists($existing['model_path'])) {
-                Storage::disk('public')->delete($existing['model_path']);
-            }
-
-            $ref->remove();
-
-            return redirect()->route('admin.products.index')
-                             ->with('success', 'Product deleted successfully.');
         } catch (\Throwable $e) {
-            return redirect()->route('admin.products.index')
-                             ->with('error', 'Failed to delete product: ' . $e->getMessage());
+            return redirect()->route('admin.products.index')->with('error', 'Failed to delete product: ' . $e->getMessage());
         }
+
+        if (!$existing) {
+            return redirect()->route('admin.products.index')->with('error', 'Product not found.');
+        }
+
+        $this->deleteFile($existing['image_path'] ?? null);
+        $this->deleteFile($existing['model_3d'] ?? null);
+
+        $ref->remove();
+
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
+    }
+
+    protected function deleteFile(?string $path): void
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    protected function modelUrl(?string $path): ?string
+    {
+        return $path ? asset('storage/' . $path) : null;
     }
 }

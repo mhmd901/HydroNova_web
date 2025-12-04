@@ -35,6 +35,7 @@ Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear')
 Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
 Route::post('/checkout/submit', [OrderController::class, 'submit'])->name('checkout.submit');
 Route::get('/thankyou', [OrderController::class, 'thankyou'])->name('thankyou');
+Route::get('/order/{id}/invoice', [OrderController::class, 'downloadInvoice'])->name('order.invoice');
 
 /*
 |--------------------------------------------------------------------------
