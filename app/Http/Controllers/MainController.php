@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use App\Services\FirebaseService;
 
 class MainController extends Controller
@@ -82,5 +83,44 @@ class MainController extends Controller
     public function about()
     {
         return view('main.about');
+    }
+
+    /**
+     * Show the AI assistant page
+     */
+    public function assistant()
+    {
+        return view('main.assistant');
+    }
+
+    /**
+     * Proxy chat messages to the n8n assistant webhook
+     */
+    public function assistantChat(Request $request)
+    {
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+
+        $message = $request->input('message');
+        $sessionId = session()->getId() ?: 'hydronova-default-session';
+        $webhookUrl = 'http://192.168.248.206:5678/webhook/hydronova-chat';
+
+        try {
+            $data = Http::post($webhookUrl, [
+                'message'   => $message,
+                'sessionId' => $sessionId,
+            ])->throw()->json();
+
+            $assistantReply = $data['output'] ?? null;
+
+            return response()->json([
+                'reply' => $assistantReply,
+            ]);
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'reply' => 'HydroNova Assistant is temporarily unavailable. Please try again later.',
+            ], 500);
+        }
     }
 }

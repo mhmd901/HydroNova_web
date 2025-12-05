@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'HydroNova - Smart Water Technology')</title>
 
     <link
@@ -83,6 +84,12 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('main.plans') ? 'text-teal fw-semibold' : '' }}" href="{{ route('main.plans') }}">Plans</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-1 {{ request()->routeIs('assistant.index') ? 'text-teal fw-semibold' : '' }}" href="{{ route('assistant.index') }}">
+                            <i class="bi bi-robot"></i>
+                            <span>Assistant</span>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('main.contact') ? 'text-teal fw-semibold' : '' }}" href="{{ route('main.contact') }}">Contact</a>
