@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Main\AssistantController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\OrderController;
@@ -17,8 +18,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [MainController::class, 'index'])->name('main.index');
 Route::get('/products', [MainController::class, 'products'])->name('main.products');
 Route::get('/plans', [MainController::class, 'plans'])->name('main.plans');
-Route::get('/assistant', [MainController::class, 'assistant'])->name('assistant.index');
-Route::post('/assistant/message', [MainController::class, 'assistantChat'])->name('assistant.message');
+Route::get('/assistant', [AssistantController::class, 'index'])->name('assistant.index');
+Route::post('/assistant/message', [AssistantController::class, 'sendMessage'])->name('assistant.message');
 Route::get('/contact', [MainController::class, 'contact'])->name('main.contact');
 Route::post('/contact', [MainController::class, 'submitContact'])->name('main.contact.submit');
 Route::get('/stl/{id}', [StlController::class, 'show'])->name('stl.show');

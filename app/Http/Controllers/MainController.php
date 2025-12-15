@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Services\FirebaseService;
 
 class MainController extends Controller
@@ -98,26 +99,61 @@ class MainController extends Controller
      */
     public function assistantChat(Request $request)
     {
-        $request->validate([
-            'message' => 'required|string',
+        $request->merge(['message' => trim($request->input('message', ''))]);
+
+        $validated = $request->validate([
+            'message' => 'required|string|min:1|max:500',
         ]);
 
-        $message = $request->input('message');
-        $sessionId = session()->getId() ?: 'hydronova-default-session';
-        $webhookUrl = 'http://192.168.248.206:5678/webhook/hydronova-chat';
+        $message = $validated['message'];
+        $sessionId = session()->getId() ?: $request->ip() ?: 'hydronova-default-session';
+        $webhookUrl = config('services.n8n.assistant_url');
 
-        try {
-            $data = Http::post($webhookUrl, [
-                'message'   => $message,
-                'sessionId' => $sessionId,
-            ])->throw()->json();
-
-            $assistantReply = $data['output'] ?? null;
+        if (empty($webhookUrl)) {
+            Log::error('Assistant webhook URL is not configured');
 
             return response()->json([
-                'reply' => $assistantReply,
+                'reply' => 'Assistant configuration error. Please try again soon.',
+            ], 500);
+        }
+
+        try {
+            $response = Http::timeout(10)
+                ->connectTimeout(5)
+                ->retry(1, 200)
+                ->acceptJson()
+                ->post($webhookUrl, [
+                    'message'   => $message,
+                    'sessionId' => $sessionId,
+                    'session_id' => $sessionId,
+                ]);
+
+            if ($response->failed()) {
+                Log::warning('Assistant webhook returned non-success status', [
+                    'status' => $response->status(),
+                    'body_snippet' => mb_substr($response->body(), 0, 500),
+                ]);
+
+                throw new \RuntimeException('Assistant webhook failed with status '.$response->status());
+            }
+
+            $data = $response->json();
+            $assistantReply = is_array($data) ? ($data['output'] ?? $data['reply'] ?? null) : null;
+
+            if (!is_string($assistantReply) || trim($assistantReply) === '') {
+                throw new \RuntimeException('Assistant webhook returned an empty reply');
+            }
+
+            return response()->json([
+                'reply' => trim($assistantReply),
             ]);
         } catch (\Throwable $exception) {
+            Log::error('Assistant webhook error', [
+                'exception' => get_class($exception),
+                'message' => $exception->getMessage(),
+                'webhook_url' => $webhookUrl,
+            ]);
+
             return response()->json([
                 'reply' => 'HydroNova Assistant is temporarily unavailable. Please try again later.',
             ], 500);

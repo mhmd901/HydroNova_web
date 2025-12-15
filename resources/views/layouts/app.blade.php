@@ -88,7 +88,7 @@
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center gap-1 {{ request()->routeIs('assistant.index') ? 'text-teal fw-semibold' : '' }}" href="{{ route('assistant.index') }}">
                             <i class="bi bi-robot"></i>
-                            <span>Assistant</span>
+                            <span>AI Assistant</span>
                         </a>
                     </li>
                     <li class="nav-item">

@@ -5,7 +5,8 @@
 @section('content')
 <style>
     .assistant-hero {
-        background: linear-gradient(135deg, rgba(45, 170, 158, 0.12), rgba(33, 141, 131, 0.14));
+        background: linear-gradient(135deg, rgba(45, 170, 158, 0.12), rgba(33, 141, 131, 0.12));
+        border-radius: 18px;
     }
 
     .chat-window {
@@ -14,7 +15,7 @@
         border-radius: 16px;
         padding: 18px;
         max-height: 520px;
-        min-height: 380px;
+        min-height: 420px;
         overflow-y: auto;
         scroll-behavior: smooth;
         display: flex;
@@ -25,11 +26,11 @@
     .chat-bubble {
         border-radius: 14px;
         padding: 12px 14px;
-        max-width: 80%;
+        max-width: 85%;
         font-size: 0.97rem;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
-        white-space: pre-wrap;
         line-height: 1.5;
+        word-break: break-word;
     }
 
     .chat-bubble.assistant {
@@ -108,47 +109,72 @@
         0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
         30% { transform: translateY(-4px); opacity: 1; }
     }
+
+    .connection-log {
+        min-height: 140px;
+        max-height: 240px;
+        overflow-y: auto;
+    }
 </style>
 
 <div class="container py-5" style="min-height: calc(100vh - 120px);">
-    <div class="row justify-content-center h-100">
-        <div class="col-xl-7 col-lg-8 d-flex">
-            <div class="card shadow-sm border-0 assistant-hero w-100 h-100">
-                <div class="card-header bg-transparent border-0 py-3 d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="chat-avatar mb-0">HN</div>
-                        <div>
-                            <h5 class="mb-0 fw-bold text-teal">HydroNova AI Assistant</h5>
-                            <small class="text-muted">Personalized hydroponic advice for your space and budget</small>
-                        </div>
-                    </div>
-                    <span class="badge text-bg-light border text-secondary">Beta</span>
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                <div>
+                    <h2 class="fw-bold text-teal mb-1">HydroNova AI Assistant</h2>
+                    <p class="text-muted mb-0">Chat safely with the  assistant. </p>
                 </div>
-                <div class="card-body">
-                    <div id="chatWindow" class="chat-window mb-3">
-                        <div class="d-flex align-items-start">
-                            <div class="chat-avatar">HN</div>
-                            <div class="chat-bubble assistant">Hello, I'm the HydroNova AI Assistant. Ask me anything.</div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0 assistant-hero h-100">
+                        <div class="card-body">
+                            <div id="chatWindow" class="chat-window mb-3" aria-live="polite">
+                                <div class="d-flex align-items-start">
+                                    <div class="chat-avatar">HN</div>
+                                    <div class="chat-bubble assistant">Hello, I'm the HydroNova Assistant. Ask me anything about systems, nutrients, or plans.</div>
+                                </div>
+                            </div>
+
+                            <form id="assistantForm" class="chat-input-area p-3">
+                                @csrf
+                                <label for="assistantMessage" class="form-label text-muted small mb-2">Press Enter to send, Shift + Enter for a new line</label>
+                                <div class="d-flex align-items-end gap-2">
+                                    <textarea
+                                        id="assistantMessage"
+                                        class="form-control"
+                                        rows="3"
+                                        maxlength="2000"
+                                        placeholder="Type your question..."
+                                        required
+                                        aria-label="Your message to the HydroNova assistant"
+                                    ></textarea>
+                                    <button type="submit" id="assistantSend" class="btn btn-teal px-4 d-flex align-items-center gap-2">
+                                        <span id="assistantSendSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                        <span id="assistantSendText">Send</span>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
+                </div>
 
-                    <form id="assistantForm" class="chat-input-area p-3">
-                        <label for="assistantMessage" class="form-label text-muted small mb-2">Ask anything about HydroNova systems, nutrients, or plans</label>
-                        <div class="d-flex align-items-end gap-2">
-                            <textarea
-                                id="assistantMessage"
-                                class="form-control"
-                                rows="3"
-                                placeholder="Type your question..."
-                                required
-                                aria-label="Your message to the HydroNova assistant"
-                            ></textarea>
-                            <button type="submit" id="assistantSend" class="btn btn-teal px-4 d-flex align-items-center gap-2">
-                                <span id="assistantSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                <span id="assistantSendText">Send</span>
-                            </button>
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h6 class="fw-semibold mb-2 d-flex align-items-center gap-2">
+                                <i class="bi bi-stars text-teal"></i>
+                                <span>Tips for better replies</span>
+                            </h6>
+                            <ul class="small text-muted mb-0 ps-3">
+                                <li>Describe your setup or room size for tailored guidance.</li>
+                                <li>Mention your goals (yield, budget, maintenance time).</li>
+                                <li>Ask follow-ups to refine nutrient schedules.</li>
+                            </ul>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -159,40 +185,42 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const endpoint = 'http://192.168.0.104:5678/webhook/hydronova-chat';
-        const sessionId = `hydronova-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+        const endpoint = @json(route('assistant.message'));
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const chatWindow = document.getElementById('chatWindow');
         const form = document.getElementById('assistantForm');
         const messageInput = document.getElementById('assistantMessage');
         const sendButton = document.getElementById('assistantSend');
         const sendText = document.getElementById('assistantSendText');
-        const spinner = document.getElementById('assistantSpinner');
+        const sendSpinner = document.getElementById('assistantSendSpinner');
+
         let typingNode = null;
         let isSending = false;
+
+        const escapeHtml = (unsafe) => unsafe
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+
+        const formatMessage = (text) => escapeHtml(text).replace(/\n/g, '<br>');
 
         const scrollToBottom = () => {
             chatWindow.scrollTop = chatWindow.scrollHeight;
         };
 
-        const setLoading = (isLoading) => {
-            sendButton.disabled = isLoading;
-            spinner.classList.toggle('d-none', !isLoading);
-            sendText.textContent = isLoading ? 'Sending' : 'Send';
-            messageInput.disabled = isLoading;
-        };
-
         const createBubble = (text, role) => {
             const wrapper = document.createElement('div');
-            const bubble = document.createElement('div');
+            wrapper.className = role === 'user' ? 'd-flex justify-content-end text-end' : 'd-flex align-items-start';
 
+            const bubble = document.createElement('div');
             bubble.className = `chat-bubble ${role === 'user' ? 'user' : 'assistant'}`;
-            bubble.textContent = text;
+            bubble.innerHTML = formatMessage(text);
 
             if (role === 'user') {
-                wrapper.className = 'd-flex justify-content-end text-end';
                 wrapper.appendChild(bubble);
             } else {
-                wrapper.className = 'd-flex align-items-start';
                 const avatar = document.createElement('div');
                 avatar.className = 'chat-avatar';
                 avatar.textContent = 'HN';
@@ -208,6 +236,7 @@
             if (typingNode) {
                 typingNode.remove();
             }
+
             const wrapper = document.createElement('div');
             wrapper.className = 'd-flex align-items-start';
 
@@ -220,7 +249,7 @@
 
             const text = document.createElement('div');
             text.className = 'typing-indicator';
-            text.textContent = 'HydroNova Assistant is thinking';
+            text.textContent = 'HydroNova Assistant is typing...';
 
             const dots = document.createElement('div');
             dots.className = 'typing-dots';
@@ -242,6 +271,14 @@
             }
         };
 
+        const setSendingState = (state) => {
+            isSending = state;
+            sendButton.disabled = state;
+            messageInput.disabled = state;
+            sendSpinner.classList.toggle('d-none', !state);
+            sendText.textContent = state ? 'Sending...' : 'Send';
+        };
+
         const sendMessage = async () => {
             const message = messageInput.value.trim();
             if (!message || isSending) {
@@ -250,9 +287,10 @@
 
             createBubble(message, 'user');
             messageInput.value = '';
-            setLoading(true);
-            isSending = true;
             showTypingIndicator();
+            setSendingState(true);
+
+            let responseJson = null;
 
             try {
                 const response = await fetch(endpoint, {
@@ -260,26 +298,25 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
+                        ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
                     },
-                    body: JSON.stringify({ message, sessionId }),
+                    body: JSON.stringify({ message }),
                 });
 
-                const data = await response.json().catch(() => null);
-                const assistantReply = data && typeof data.output === 'string' ? data.output.trim() : '';
+                responseJson = await response.json().catch(() => null);
 
-                removeTypingIndicator();
-
-                if (!response.ok || !assistantReply) {
-                    throw new Error('Invalid response');
+                if (!response.ok || !responseJson || typeof responseJson.output !== 'string') {
+                    throw new Error(responseJson?.error || `Unexpected response (HTTP ${response.status})`);
                 }
 
-                createBubble(assistantReply, 'assistant');
-            } catch (error) {
                 removeTypingIndicator();
-                createBubble('Sorry, I had a problem answering. Please try again.', 'assistant');
+                createBubble(responseJson.output, 'assistant');
+            } catch (error) {
+                console.error('Assistant request failed', { error, response: responseJson });
+                removeTypingIndicator();
+                createBubble('I could not reach HydroNova Assistant right now. Please try again.', 'assistant');
             } finally {
-                isSending = false;
-                setLoading(false);
+                setSendingState(false);
                 messageInput.focus();
             }
         };

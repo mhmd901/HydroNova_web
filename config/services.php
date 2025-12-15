@@ -32,7 +32,7 @@ return [
     ],
 
     'n8n' => [
-        'assistant_url' => env('N8N_ASSISTANT_URL'),
+        'webhook_url' => env('N8N_WEBHOOK_URL'),
     ],
 
 ];
