@@ -97,19 +97,56 @@
                     @php
                         $cartItems = session('cart', []);
                         $navCartCount = array_sum(array_map(fn ($item) => $item['quantity'] ?? 0, $cartItems));
+                        $customer = session('customer');
                     @endphp
                     <li class="nav-item ms-lg-3 position-relative">
-                        <a class="nav-link position-relative" href="{{ route('cart.index') }}" aria-label="View cart">
+                        <a class="nav-link position-relative" href="{{ $customer ? route('cart.index') : route('login') }}" aria-label="View cart">
                             <i class="bi bi-cart3 fs-5"></i>
                             <span class="cart-badge" data-cart-count>{{ $navCartCount }}</span>
                         </a>
                     </li>
+                    @if (!$customer)
+                        <li class="nav-item ms-lg-3">
+                            <a class="btn btn-outline-secondary px-3" href="{{ route('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn btn-teal px-3" href="{{ route('register') }}">Register</a>
+                        </li>
+                    @else
+                        <li class="nav-item ms-lg-3">
+                            <a class="nav-link {{ request()->routeIs('profile.edit') ? 'text-teal fw-semibold' : '' }}" href="{{ route('profile.edit') }}">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('orders.*') ? 'text-teal fw-semibold' : '' }}" href="{{ route('orders.index') }}">My Orders</a>
+                        </li>
+                        <li class="nav-item">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button class="btn btn-link nav-link text-decoration-none" type="submit">Logout</button>
+                            </form>
+                        </li>
+                    @endif
                 </ul>
             </div>
         </div>
     </nav>
 
     <main>
+        <div class="container pt-3">
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if (session('auth_notice'))
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    {{ session('auth_notice') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+        </div>
         @yield('content')
     </main>
 

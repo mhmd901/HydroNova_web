@@ -6,7 +6,11 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Main\AssistantController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\MainController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CustomerOrderController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\CustomerAuthController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\StlController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,16 +33,33 @@ Route::get('/stl/{id}', [StlController::class, 'show'])->name('stl.show');
 | Cart & Checkout
 |--------------------------------------------------------------------------
 */
+// Cart accessible to guests (Option B UX)
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
 Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
-Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
-Route::post('/checkout/submit', [OrderController::class, 'submit'])->name('checkout.submit');
-Route::get('/thankyou', [OrderController::class, 'thankyou'])->name('thankyou');
-Route::get('/order/{id}/invoice', [OrderController::class, 'downloadInvoice'])->name('order.invoice');
+// Firebase-auth protected customer routes (session-based)
+Route::middleware('customer.auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+    Route::post('/checkout/submit', [CheckoutController::class, 'submit'])->name('checkout.submit');
+    Route::get('/thankyou', [CheckoutController::class, 'thankyou'])->name('thankyou');
+    Route::get('/order/{order}/invoice', [CheckoutController::class, 'downloadInvoice'])->name('order.invoice');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/my-orders', [CustomerOrderController::class, 'index'])->name('orders.index');
+    Route::get('/my-orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
+});
+
+// Customer Auth routes (server-side, Firebase admin)
+Route::get('/login', [CustomerAuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [CustomerAuthController::class, 'login']);
+Route::get('/register', [CustomerAuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [CustomerAuthController::class, 'register']);
+Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
@@ -74,11 +95,11 @@ Route::middleware('auth.admin')->group(function () {
     Route::delete('/admin/plans/{id}', [PlanController::class, 'destroy'])->name('admin.plans.destroy');
 
     // Orders management
-    Route::get('/admin/orders', [OrderController::class, 'adminIndex'])->name('admin.orders.index');
-    Route::get('/admin/orders/{orderKey}', [OrderController::class, 'adminShow'])->name('admin.orders.show');
-    Route::get('/admin/orders/{orderKey}/edit', [OrderController::class, 'adminEdit'])->name('admin.orders.edit');
-    Route::put('/admin/orders/{orderKey}', [OrderController::class, 'adminUpdate'])->name('admin.orders.update');
-    Route::delete('/admin/orders/{orderKey}', [OrderController::class, 'adminDestroy'])->name('admin.orders.destroy');
+Route::get('/admin/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+Route::get('/admin/orders/{orderKey}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
+Route::get('/admin/orders/{orderKey}/edit', [AdminOrderController::class, 'edit'])->name('admin.orders.edit');
+Route::put('/admin/orders/{orderKey}', [AdminOrderController::class, 'update'])->name('admin.orders.update');
+Route::delete('/admin/orders/{orderKey}', [AdminOrderController::class, 'destroy'])->name('admin.orders.destroy');
 
     // Settings
     Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');

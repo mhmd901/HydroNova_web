@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use Kreait\Firebase\Factory;
+use Kreait\Firebase\Auth as FirebaseAuth;
 
 class FirebaseService
 {
     protected $database;
+    protected $auth;
 
     public function __construct()
     {
@@ -19,6 +21,7 @@ class FirebaseService
             ->withDatabaseUri('https://hydronova-f2401-default-rtdb.firebaseio.com/');
 
         $this->database = $factory->createDatabase();
+        $this->auth = $factory->createAuth();
     }
 
     public function getAll($collection)
@@ -31,5 +34,10 @@ class FirebaseService
     public function getRef($collection)
     {
         return $this->database->getReference($collection);
+    }
+
+    public function auth(): FirebaseAuth
+    {
+        return $this->auth;
     }
 }

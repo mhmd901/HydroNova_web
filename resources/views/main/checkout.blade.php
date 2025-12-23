@@ -13,7 +13,7 @@
         <div class="row g-4">
             <div class="col-12">
                 <h1 class="h3 fw-bold mb-2">Secure Checkout</h1>
-                <p class="text-muted mb-4">Share your delivery information and confirm your purchase. We will instantly redirect you to WhatsApp to finalize the order.</p>
+                <p class="text-muted mb-4">Share your delivery information and confirm your purchase. Your order will be saved to your account so you can track it.</p>
             </div>
 
             <div class="col-lg-7">
@@ -35,9 +35,9 @@
                             @csrf
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Full Name</label>
-                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                       value="{{ old('name') }}" placeholder="John Doe" required>
-                                @error('name')
+                                <input type="text" name="full_name" class="form-control @error('full_name') is-invalid @enderror"
+                                       value="{{ old('full_name', $profile['full_name'] ?? ($customer['full_name'] ?? '')) }}" placeholder="John Doe" required>
+                                @error('full_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -53,8 +53,17 @@
                             </div>
 
                             <div class="col-12">
+                                <label class="form-label fw-semibold">City</label>
+                                <input type="text" name="city" class="form-control @error('city') is-invalid @enderror"
+                                       value="{{ old('city', $profile['city'] ?? '') }}" placeholder="Beirut">
+                                @error('city')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12">
                                 <label class="form-label fw-semibold">Delivery Address</label>
-                                <textarea name="address" rows="3" class="form-control @error('address') is-invalid @enderror" required>{{ old('address') }}</textarea>
+                                <textarea name="address" rows="3" class="form-control @error('address') is-invalid @enderror" required>{{ old('address', $profile['address'] ?? '') }}</textarea>
                                 @error('address')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -68,15 +77,14 @@
                                 @enderror
                             </div>
 
-                            @foreach ($cart as $index => $item)
-                                <input type="hidden" name="items[{{ $index }}][id]" value="{{ $item['id'] }}">
-                                <input type="hidden" name="items[{{ $index }}][name]" value="{{ $item['name'] }}">
-                                <input type="hidden" name="items[{{ $index }}][price]" value="{{ $item['price'] }}">
-                                <input type="hidden" name="items[{{ $index }}][quantity]" value="{{ $item['quantity'] }}">
-                            @endforeach
-
-                            <input type="hidden" name="delivery_fee" value="{{ $deliveryFee }}">
-                            <input type="hidden" name="total" value="{{ $grandTotal }}">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="save_to_profile" id="save_to_profile" value="1" {{ old('save_to_profile', true) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="save_to_profile">
+                                        Save this information to my profile
+                                    </label>
+                                </div>
+                            </div>
 
                             <div class="col-12 d-flex justify-content-between align-items-center mt-3">
                                 <a href="{{ route('cart.index') }}" class="btn btn-outline-secondary">
@@ -120,7 +128,7 @@
                         </div>
                         <hr>
                         <p class="small text-muted mb-0">
-                            Submitting will open WhatsApp with your order summary. HydroNova's admin team simultaneously receives an alert to start processing your delivery.
+                            After you place the order, you can download the invoice and follow progress from the My Orders page.
                         </p>
                     </div>
                 </div>

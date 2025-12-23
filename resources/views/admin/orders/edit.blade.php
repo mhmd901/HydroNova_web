@@ -4,10 +4,10 @@
 <div class="container-fluid py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold mb-1">Update Order {{ $order['id'] ?? '' }}</h2>
+            <h2 class="fw-bold mb-1">Update Order {{ $order->id ?? '' }}</h2>
             <p class="text-muted mb-0">Adjust the fulfillment status and review the latest cart snapshot.</p>
         </div>
-        <a href="{{ route('admin.orders.show', $order['key']) }}" class="btn btn-outline-secondary">
+        <a href="{{ route('admin.orders.show', $order->_key) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to Order
         </a>
     </div>
@@ -27,14 +27,14 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h4 class="fw-semibold mb-3">Status</h4>
-                    <form action="{{ route('admin.orders.update', $order['key']) }}" method="POST" class="row g-3">
+                    <form action="{{ route('admin.orders.update', $order->_key) }}" method="POST" class="row g-3">
                         @csrf
                         @method('PUT')
                         <div class="col-12">
                             <label class="form-label fw-semibold">Select Status</label>
                             <select name="status" class="form-select">
                                 @foreach ($statusOptions as $status)
-                                    <option value="{{ $status }}" @selected(($order['status'] ?? 'Pending') === $status)>
+                                    <option value="{{ $status }}" @selected(($order->status ?? 'Pending') === $status)>
                                         {{ $status }}
                                     </option>
                                 @endforeach
@@ -53,9 +53,9 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h4 class="fw-semibold mb-3">Order Snapshot</h4>
-                    <p class="mb-1"><strong>Customer:</strong> {{ $order['name'] ?? 'N/A' }}</p>
-                    <p class="mb-1"><strong>Phone:</strong> {{ $order['phone'] ?? 'N/A' }}</p>
-                    <p class="mb-3"><strong>Address:</strong> {{ $order['address'] ?? 'N/A' }}</p>
+                    <p class="mb-1"><strong>Customer:</strong> {{ $order->full_name ?? 'N/A' }}</p>
+                    <p class="mb-1"><strong>Phone:</strong> {{ $order->phone ?? 'N/A' }}</p>
+                    <p class="mb-3"><strong>Address:</strong> {{ $order->address ?? 'N/A' }} @if($order->city) ({{ $order->city }}) @endif</p>
 
                     <div class="table-responsive">
                         <table class="table table-sm align-middle">
@@ -67,9 +67,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($order['items'] ?? [] as $item)
+                                @foreach ($order->items ?? [] as $item)
                                     <tr>
-                                        <td>{{ $item['name'] ?? 'Product' }}</td>
+                                        <td>{{ $item['name'] ?? $item['product_name'] ?? 'Product' }}</td>
                                         <td class="text-center">{{ $item['quantity'] ?? $item['qty'] ?? 1 }}</td>
                                         <td class="text-end">${{ number_format((float)($item['subtotal'] ?? (($item['price'] ?? 0) * ($item['quantity'] ?? 1))), 2) }}</td>
                                     </tr>
@@ -79,7 +79,7 @@
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         <span class="text-muted">Total</span>
-                        <span class="fs-5 fw-bold">${{ number_format((float)($order['total'] ?? 0), 2) }}</span>
+                        <span class="fs-5 fw-bold">${{ number_format((float)($order->total ?? 0), 2) }}</span>
                     </div>
                 </div>
             </div>

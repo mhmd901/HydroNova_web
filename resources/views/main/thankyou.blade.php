@@ -25,7 +25,7 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <p class="text-uppercase text-muted mb-1 small">Name</p>
-                                            <p class="fw-medium mb-0">{{ $order['name'] ?? 'N/A' }}</p>
+                                            <p class="fw-medium mb-0">{{ $order['full_name'] ?? 'N/A' }}</p>
                                         </div>
                                         <div class="col-md-6">
                                             <p class="text-uppercase text-muted mb-1 small">Phone</p>
@@ -77,7 +77,7 @@
                             <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
                                 @php
                                     $whatsAppText = urlencode('Hello HydroNova I need support about Order ID ' . ($order['id'] ?? ''));
-                                    $invoiceTarget = $order['key'] ?? $orderKey;
+                                    $invoiceTarget = $order['key'] ?? null;
                                 @endphp
                                 <a href="https://wa.me/96181370450?text={{ $whatsAppText }}"
                                    class="btn btn-success btn-lg px-4 d-inline-flex align-items-center justify-content-center gap-2 shadow-sm"
@@ -93,8 +93,9 @@
                                 </a>
                             </div>
                         @else
-                            <p class="text-muted fs-5">Your order has already been confirmed.</p>
-                            <p class="text-muted">If you need assistance, reach out to us on WhatsApp and we will be happy to help.</p>
+                            <p class="text-muted fs-5">We could not find a recent order.</p>
+                            <p class="text-muted">If you placed an order recently, you can review it from your orders page.</p>
+                            <a href="{{ route('orders.index') }}" class="btn btn-teal mt-3">Go to My Orders</a>
                         @endif
 
                         @if (session('invoice_error'))

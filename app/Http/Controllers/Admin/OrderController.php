@@ -28,7 +28,7 @@ class OrderController extends Controller
         $orders = [];
         if (is_array($ordersData)) {
             foreach ($ordersData as $key => $order) {
-                $orders[] = array_merge($order ?? [], [
+                $orders[] = (object)array_merge($order ?? [], [
                     '_key' => $key,
                     'id'   => $order['id'] ?? ('#' . strtoupper(substr($key, -6))),
                 ]);
@@ -37,21 +37,63 @@ class OrderController extends Controller
 
         return view('admin.orders.index', [
             'orders' => $orders,
+            'statusOptions' => ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+        ]);
+    }
+
+    /**
+     * Show a single order.
+     */
+    public function show(string $orderKey): View|RedirectResponse
+    {
+        $order = $this->firebase->getRef("orders/{$orderKey}")->getValue();
+
+        if (!$order || !is_array($order)) {
+            return redirect()->route('admin.orders.index')->withErrors(['order' => 'Order not found.']);
+        }
+
+        $order['_key'] = $orderKey;
+        $order['items'] = $this->firebase->getRef("order_items/{$orderKey}")->getValue() ?? ($order['items'] ?? []);
+
+        return view('admin.orders.show', [
+            'order' => (object)$order,
+            'statusOptions' => ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+        ]);
+    }
+
+    /**
+     * Edit form.
+     */
+    public function edit(string $orderKey): View|RedirectResponse
+    {
+        $order = $this->firebase->getRef("orders/{$orderKey}")->getValue();
+
+        if (!$order || !is_array($order)) {
+            return redirect()->route('admin.orders.index')->withErrors(['order' => 'Order not found.']);
+        }
+
+        $order['_key'] = $orderKey;
+        $order['items'] = $this->firebase->getRef("order_items/{$orderKey}")->getValue() ?? ($order['items'] ?? []);
+
+        return view('admin.orders.edit', [
+            'order' => (object)$order,
+            'statusOptions' => ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
         ]);
     }
 
     /**
      * Update the status of a specific order.
      */
-    public function updateStatus(Request $request, string $id): RedirectResponse
+    public function update(Request $request, string $orderKey): RedirectResponse
     {
         $request->validate([
-            'status' => 'required|in:Pending,Confirmed,Delivered,Canceled',
+            'status' => 'required|in:Pending,Confirmed,Processing,Shipped,Delivered,Cancelled',
         ]);
 
-        $orderRef = $this->firebase->getRef("orders/{$id}");
+        $orderRef = $this->firebase->getRef("orders/{$orderKey}");
+
         if (!$orderRef->getSnapshot()->exists()) {
-            return back()->with('error', 'Order not found.');
+            return back()->withErrors(['order' => 'Order not found.']);
         }
 
         $orderRef->update(['status' => $request->status]);
@@ -62,16 +104,16 @@ class OrderController extends Controller
     /**
      * Delete an order from Firebase.
      */
-    public function destroy(string $id): RedirectResponse
+    public function destroy(string $orderKey): RedirectResponse
     {
-        $orderRef = $this->firebase->getRef("orders/{$id}");
+        $orderRef = $this->firebase->getRef("orders/{$orderKey}");
         if (!$orderRef->getSnapshot()->exists()) {
             return back()->with('error', 'Order not found.');
         }
 
         $orderRef->remove();
+        $this->firebase->getRef("order_items/{$orderKey}")->remove();
 
         return back()->with('success', 'Order deleted successfully.');
     }
 }
-

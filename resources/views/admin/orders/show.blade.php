@@ -3,13 +3,14 @@
 @section('content')
 @php
     $statusPalette = [
-        'Pending'   => ['label' => 'Pending Review', 'color' => '#f7c948', 'text' => '#3f3000'],
-        'Confirmed' => ['label' => 'Confirmed', 'color' => '#0d6efd', 'text' => '#fff'],
-        'Shipped'   => ['label' => 'Shipped', 'color' => '#6f42c1', 'text' => '#fff'],
-        'Completed' => ['label' => 'Completed', 'color' => '#198754', 'text' => '#fff'],
-        'Canceled'  => ['label' => 'Canceled', 'color' => '#dc3545', 'text' => '#fff'],
+        'Pending'    => ['label' => 'Pending Review', 'color' => '#f7c948', 'text' => '#3f3000'],
+        'Confirmed'  => ['label' => 'Confirmed', 'color' => '#0d6efd', 'text' => '#fff'],
+        'Processing' => ['label' => 'Processing', 'color' => '#6f42c1', 'text' => '#fff'],
+        'Shipped'    => ['label' => 'Shipped', 'color' => '#6c757d', 'text' => '#fff'],
+        'Delivered'  => ['label' => 'Delivered', 'color' => '#198754', 'text' => '#fff'],
+        'Cancelled'  => ['label' => 'Cancelled', 'color' => '#dc3545', 'text' => '#fff'],
     ];
-    $currentStatus = $order['status'] ?? 'Pending';
+    $currentStatus = $order->status ?? 'Pending';
     $currentStatusIndex = array_search($currentStatus, $statusOptions, true);
     $activeStatusColors = $statusPalette[$currentStatus] ?? ['color' => '#6c757d', 'text' => '#fff'];
 @endphp
@@ -17,14 +18,14 @@
 <div class="container-fluid py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold mb-1">Order {{ $order['id'] ?? '' }}</h2>
-            <p class="text-muted mb-0">Placed {{ $order['created_at'] ?? 'N/A' }}</p>
+            <h2 class="fw-bold mb-1">Order {{ $order->id ?? '' }}</h2>
+            <p class="text-muted mb-0">Placed {{ $order->created_at ?? 'N/A' }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Back
             </a>
-            <a href="{{ route('admin.orders.edit', $order['key']) }}" class="btn btn-primary">
+            <a href="{{ route('admin.orders.edit', $order->_key) }}" class="btn btn-primary">
                 <i class="bi bi-pencil-square"></i> Edit Status
             </a>
         </div>
@@ -53,9 +54,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($order['items'] ?? [] as $item)
+                                @foreach ($order->items ?? [] as $item)
                                     <tr>
-                                        <td>{{ $item['name'] ?? 'Product' }}</td>
+                                        <td>{{ $item['name'] ?? $item['product_name'] ?? 'Product' }}</td>
                                         <td class="text-center">{{ $item['quantity'] ?? $item['qty'] ?? 1 }}</td>
                                         <td class="text-center">${{ number_format((float)($item['price'] ?? 0), 2) }}</td>
                                         <td class="text-end">${{ number_format((float)($item['subtotal'] ?? (($item['price'] ?? 0) * ($item['quantity'] ?? 1))), 2) }}</td>
@@ -67,7 +68,7 @@
                     <hr>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-muted">Grand Total</span>
-                        <span class="fs-4 fw-bold">${{ number_format((float)($order['total'] ?? 0), 2) }}</span>
+                        <span class="fs-4 fw-bold">${{ number_format((float)($order->total ?? 0), 2) }}</span>
                     </div>
                 </div>
             </div>
@@ -103,21 +104,22 @@
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body">
                     <h4 class="fw-semibold mb-3">Customer</h4>
-                    <p class="mb-1 fw-semibold">{{ $order['name'] ?? 'N/A' }}</p>
+                    <p class="mb-1 fw-semibold">{{ $order->full_name ?? 'N/A' }}</p>
+                    <p class="mb-1 text-muted">{{ $order->email ?? '' }}</p>
                     <p class="mb-1">
-                        @if (!empty($order['phone']))
-                            <a href="tel:{{ $order['phone'] }}" class="text-decoration-none">
-                                <i class="bi bi-telephone text-success me-1"></i>{{ $order['phone'] }}
+                        @if (!empty($order->phone))
+                            <a href="tel:{{ $order->phone }}" class="text-decoration-none">
+                                <i class="bi bi-telephone text-success me-1"></i>{{ $order->phone }}
                             </a>
                         @else
                             <span class="text-muted">No phone</span>
                         @endif
                     </p>
-                    <p class="mb-3 text-muted">{{ $order['address'] ?? 'N/A' }}</p>
-                    @if (!empty($order['note']))
+                    <p class="mb-3 text-muted">{{ $order->address ?? 'N/A' }} @if($order->city) ({{ $order->city }}) @endif</p>
+                    @if (!empty($order->note))
                         <div class="p-3 rounded bg-light">
                             <p class="fw-semibold mb-1">Note</p>
-                            <p class="mb-0 text-muted">{{ $order['note'] }}</p>
+                            <p class="mb-0 text-muted">{{ $order->note }}</p>
                         </div>
                     @endif
                 </div>
@@ -131,8 +133,8 @@
                         {{ $currentStatus }}
                     </span>
                     <div class="mt-3">
-                        @if (!empty($order['phone']))
-                            <a href="https://wa.me/{{ ltrim($order['phone'], '+') }}" target="_blank" class="btn btn-outline-success w-100">
+                        @if (!empty($order->phone))
+                            <a href="https://wa.me/{{ ltrim($order->phone, '+') }}" target="_blank" class="btn btn-outline-success w-100">
                                 <i class="bi bi-whatsapp"></i> Message Customer
                             </a>
                         @else

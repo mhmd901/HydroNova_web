@@ -12,6 +12,16 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        return $request->expectsJson() ? null : route('login');
+        if ($request->expectsJson()) {
+            return null;
+        }
+
+        if ($request->is('checkout*')) {
+            $request->session()->flash('auth_notice', 'Please log in to continue checkout.');
+        } elseif ($request->is('cart*')) {
+            $request->session()->flash('auth_notice', 'Please log in to view your cart.');
+        }
+
+        return route('login');
     }
 }

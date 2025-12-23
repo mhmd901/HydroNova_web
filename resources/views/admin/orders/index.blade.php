@@ -3,11 +3,12 @@
 @section('content')
 @php
     $statusStyles = [
-        'Pending'   => 'background:#f7c948;color:#3f3000;',
-        'Confirmed' => 'background:#0d6efd;color:#fff;',
-        'Shipped'   => 'background:#6f42c1;color:#fff;',
-        'Completed' => 'background:#198754;color:#fff;',
-        'Canceled'  => 'background:#dc3545;color:#fff;',
+        'Pending'    => 'background:#f7c948;color:#3f3000;',
+        'Confirmed'  => 'background:#0d6efd;color:#fff;',
+        'Processing' => 'background:#6f42c1;color:#fff;',
+        'Shipped'    => 'background:#6c757d;color:#fff;',
+        'Delivered'  => 'background:#198754;color:#fff;',
+        'Cancelled'  => 'background:#dc3545;color:#fff;',
     ];
 @endphp
 
@@ -57,15 +58,15 @@
                         <tbody>
                             @foreach ($orders as $order)
                                 @php
-                                    $status = $order['status'] ?? 'Pending';
-                                    $createdAt = $order['created_at'] ?? '';
+                                    $status = $order->status ?? 'Pending';
+                                    $createdAt = $order->created_at ?? '';
                                     $formattedDate = $createdAt ? \Carbon\Carbon::parse($createdAt)->format('M d, Y - H:i') : 'N/A';
-                                    $phone = $order['phone'] ?? '';
+                                    $phone = $order->phone ?? '';
                                     $phoneDisplay = $phone ? '+' . ltrim($phone, '+') : 'N/A';
                                 @endphp
                                 <tr>
-                                    <td class="fw-semibold">{{ $order['id'] ?? 'N/A' }}</td>
-                                    <td>{{ $order['name'] ?? 'N/A' }}</td>
+                                    <td class="fw-semibold">{{ $order->id ?? 'N/A' }}</td>
+                                    <td>{{ $order->full_name ?? $order->name ?? 'N/A' }}</td>
                                     <td>
                                         @if ($phone)
                                             <div class="d-flex flex-column">
@@ -78,8 +79,8 @@
                                             <span class="text-muted">N/A</span>
                                         @endif
                                     </td>
-                                    <td class="text-truncate" style="max-width: 220px;">{{ $order['address'] ?? 'N/A' }}</td>
-                                    <td class="fw-bold">${{ number_format((float)($order['total'] ?? 0), 2) }}</td>
+                                    <td class="text-truncate" style="max-width: 220px;">{{ $order->address ?? 'N/A' }}</td>
+                                    <td class="fw-bold">${{ number_format((float)($order->total ?? 0), 2) }}</td>
                                     <td>{{ $formattedDate }}</td>
                                     <td>
                                         <span class="badge rounded-pill" style="{{ $statusStyles[$status] ?? 'background:#6c757d;color:#fff;' }}">
@@ -88,9 +89,9 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="{{ route('admin.orders.show', $order['key']) }}" class="btn btn-outline-secondary">View</a>
-                                            <a href="{{ route('admin.orders.edit', $order['key']) }}" class="btn btn-outline-primary">Edit</a>
-                                            <form action="{{ route('admin.orders.destroy', $order['key']) }}" method="POST" onsubmit="return confirm('Delete order {{ $order['id'] ?? '' }}?')" class="d-inline">
+                                            <a href="{{ route('admin.orders.show', $order->_key) }}" class="btn btn-outline-secondary">View</a>
+                                            <a href="{{ route('admin.orders.edit', $order->_key) }}" class="btn btn-outline-primary">Edit</a>
+                                            <form action="{{ route('admin.orders.destroy', $order->_key) }}" method="POST" onsubmit="return confirm('Delete order {{ $order->id ?? '' }}?')" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-outline-danger">Delete</button>

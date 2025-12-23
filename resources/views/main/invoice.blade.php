@@ -83,11 +83,11 @@
             <td><strong>Date:</strong> {{ isset($order['created_at']) ? \Carbon\Carbon::parse($order['created_at'])->format('F j, Y g:i A') : now()->format('F j, Y g:i A') }}</td>
         </tr>
         <tr>
-            <td><strong>Customer:</strong> {{ $order['name'] ?? 'N/A' }}</td>
+            <td><strong>Customer:</strong> {{ $order['full_name'] ?? $order['name'] ?? 'N/A' }}</td>
             <td><strong>Phone:</strong> {{ $order['phone'] ?? 'N/A' }}</td>
         </tr>
         <tr>
-            <td colspan="2"><strong>Address:</strong> {{ $order['address'] ?? 'N/A' }}</td>
+            <td colspan="2"><strong>Address:</strong> {{ $order['address'] ?? 'N/A' }} @if (!empty($order['city'])) ({{ $order['city'] }}) @endif</td>
         </tr>
         @if (!empty($order['note']))
             <tr>
