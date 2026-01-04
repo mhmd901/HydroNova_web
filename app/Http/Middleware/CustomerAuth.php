@@ -12,7 +12,7 @@ class CustomerAuth
     {
         if (!session()->has('customer.uid')) {
             $request->session()->flash('auth_notice', 'Please log in to continue checkout.');
-            return redirect()->route('login')->with('intended', $request->fullUrl());
+            return redirect()->guest(route('login'));
         }
 
         return $next($request);

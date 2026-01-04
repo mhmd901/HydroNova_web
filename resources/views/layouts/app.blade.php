@@ -67,7 +67,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('main.index') }}">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('home') }}">
                 <img src="{{ asset('images/hydronova_logo.png') }}" alt="HydroNova">
                 <span class="fw-bold text-teal">HydroNova</span>
             </a>
@@ -77,7 +77,7 @@
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('main.index') ? 'text-teal fw-semibold' : '' }}" href="{{ route('main.index') }}">Home</a>
+                        <a class="nav-link {{ request()->routeIs('home') ? 'text-teal fw-semibold' : '' }}" href="{{ route('home') }}">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('main.products') ? 'text-teal fw-semibold' : '' }}" href="{{ route('main.products') }}">Products</a>
