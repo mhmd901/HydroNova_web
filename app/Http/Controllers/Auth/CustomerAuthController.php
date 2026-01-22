@@ -3,17 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Services\FirebaseService;
+use App\Services\Auth\WebAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class CustomerAuthController extends Controller
 {
-    public function __construct(private FirebaseService $firebase)
+    public function __construct(private WebAuthService $authService)
     {
     }
 
@@ -35,22 +33,17 @@ class CustomerAuthController extends Controller
             'password' => ['required', 'confirmed', 'min:6'],
         ]);
 
-        if ($this->findCustomerByEmail($data['email'])) {
+        if ($this->authService->findCustomerByEmail($data['email'])) {
             return back()->withErrors(['email' => 'An account with that email already exists.'])->withInput();
         }
 
-        $uid = 'cust_' . Str::lower(Str::random(10));
-        $customerRecord = [
-            'uid'           => $uid,
-            'full_name'     => $data['full_name'],
-            'email'         => $data['email'],
-            'password_hash' => Hash::make($data['password']),
-            'created_at'    => now()->toDateTimeString(),
-        ];
+        $customerRecord = $this->authService->createCustomer(
+            $data['full_name'],
+            $data['email'],
+            $data['password']
+        );
 
-        $this->firebase->getRef("customers/{$uid}")->set($customerRecord);
-
-        $this->setSessionCustomer($uid, $customerRecord);
+        $this->setSessionCustomer($customerRecord['uid'], $customerRecord);
 
         return redirect()->intended('/');
     }
@@ -66,9 +59,9 @@ class CustomerAuthController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        $customer = $this->findCustomerByEmail($request->input('email'));
+        $customer = $this->authService->findCustomerByEmail($request->input('email'));
 
-        if (!$customer || empty($customer['password_hash']) || !Hash::check($request->input('password'), $customer['password_hash'])) {
+        if (!$customer || !$this->authService->verifyPassword($customer, $request->input('password'))) {
             return back()->withErrors(['email' => 'Invalid credentials.'])->withInput();
         }
 
@@ -84,29 +77,6 @@ class CustomerAuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
-    }
-
-    private function findCustomerByEmail(string $email): ?array
-    {
-        $snapshot = $this->firebase->getRef('customers')
-            ->orderByChild('email')
-            ->equalTo($email)
-            ->getValue();
-
-        if (!$snapshot || !is_array($snapshot)) {
-            return null;
-        }
-
-        $record = reset($snapshot);
-        if (!is_array($record)) {
-            return null;
-        }
-
-        if (!isset($record['uid'])) {
-            $record['uid'] = array_key_first($snapshot);
-        }
-
-        return $record;
     }
 
     private function setSessionCustomer(string $uid, array $customer): void

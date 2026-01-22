@@ -11,7 +11,6 @@ use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\CustomerAuthController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
-use App\Http\Controllers\MobileAuthController;
 use App\Http\Controllers\StlController;
 use Illuminate\Support\Facades\Route;
 
@@ -62,15 +61,6 @@ Route::get('/register', [CustomerAuthController::class, 'showRegister'])->name('
 Route::post('/register', [CustomerAuthController::class, 'register']);
 Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
 
-/*
-|--------------------------------------------------------------------------
-| Mobile API (JSON only)
-|--------------------------------------------------------------------------
-*/
-Route::post('/M_register', [MobileAuthController::class, 'register']);
-Route::post('/M_login', [MobileAuthController::class, 'login']);
-Route::post('/M_logout', [MobileAuthController::class, 'logout']);
-Route::get('/M_me', [MobileAuthController::class, 'me']);
 
 /*
 |--------------------------------------------------------------------------

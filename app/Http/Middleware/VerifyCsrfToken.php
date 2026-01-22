@@ -15,6 +15,5 @@ class VerifyCsrfToken extends Middleware
         'M_register',
         'M_login',
         'M_logout',
-        'M_me',
     ];
 }
