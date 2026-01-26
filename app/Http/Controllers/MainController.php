@@ -24,7 +24,8 @@ class MainController extends Controller
      */
     public function index()
     {
-        return view('main.index');
+        $plans = $this->firebase->getAll('plans');
+        return view('main.index', compact('plans'));
     }
 
     /**
@@ -42,7 +43,8 @@ class MainController extends Controller
     public function plans()
     {
         $plans = $this->firebase->getAll('plans');
-        return view('main.plans', compact('plans'));
+        $products = $this->firebase->getAll('products');
+        return view('main.plans', compact('plans', 'products'));
     }
 
     /**

@@ -23,38 +23,50 @@ class PlanController extends Controller
 
     public function create()
     {
-        return view('admin.plans.create');
+        $products = $this->firebase->getAll('products') ?? [];
+        return view('admin.plans.create', compact('products'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'price' => 'required|numeric',
+            'name' => 'required|string|max:150',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:2000',
+            'product_ids' => 'nullable|array',
+            'product_ids.*' => 'string',
         ]);
 
-        $this->firebase->getRef('plans')->push($request->only('name', 'price'));
+        $payload = $request->only('name', 'price', 'description');
+        $payload['product_ids'] = array_values((array) $request->input('product_ids', []));
 
-        // ✅ Fixed redirect route
+        $this->firebase->getRef('plans')->push($payload);
+
         return redirect()->route('admin.plans.index')->with('success', 'Plan added successfully.');
     }
 
     public function edit($id)
     {
         $plan = $this->firebase->getRef('plans/' . $id)->getValue();
-        return view('admin.plans.edit', compact('plan', 'id'));
+        $products = $this->firebase->getAll('products') ?? [];
+        return view('admin.plans.edit', compact('plan', 'id', 'products'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required',
-            'price' => 'required|numeric',
+            'name' => 'required|string|max:150',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:2000',
+            'product_ids' => 'nullable|array',
+            'product_ids.*' => 'string',
         ]);
 
-        $this->firebase->getRef('plans/' . $id)->update($request->only('name', 'price'));
+        $payload = $request->only('name', 'price', 'description');
+        $payload['product_ids'] = array_values((array) $request->input('product_ids', []));
 
-        // ✅ Fixed redirect route
+        $this->firebase->getRef('plans/' . $id)->update($payload);
+
         return redirect()->route('admin.plans.index')->with('success', 'Plan updated successfully.');
     }
 
@@ -62,7 +74,6 @@ class PlanController extends Controller
     {
         $this->firebase->getRef('plans/' . $id)->remove();
 
-        // ✅ Fixed redirect route
         return redirect()->route('admin.plans.index')->with('success', 'Plan deleted successfully.');
     }
 }

@@ -3,6 +3,9 @@
 @section('content')
 <section class="plans-section py-5 text-center text-dark">
   <div class="container">
+    @php
+      $products = $products ?? [];
+    @endphp
     <h2 class="fw-bold mb-4">Our <span class="text-success">Plans</span></h2>
     <p class="text-muted mb-5">Pick the perfect HydroNova plan for your home, business, or organization.</p>
 
@@ -10,19 +13,70 @@
       @if(!empty($plans))
         @foreach($plans as $id => $plan)
           <div class="col-md-4" data-id="{{ $id }}">
-            <div class="card plan-card border-0 shadow-lg h-100 overflow-hidden">
-              <div class="image-wrapper position-relative">
-                <img src="{{ $plan['image'] ?? asset('images/hero_bg.jpg') }}" 
-                     class="card-img-top plan-image" alt="{{ $plan['name'] ?? 'Plan' }}">
-                <button class="favorite-btn" onclick="togglePlanFavorite('{{ $id }}')">
-                  <i class="bi bi-star"></i>
-                </button>
-              </div>
-              <div class="card-body">
-                <h4 class="fw-bold text-primary">{{ $plan['name'] ?? 'Unnamed Plan' }}</h4>
-                <h2 class="fw-bold text-success">${{ $plan['price'] ?? '0' }}</h2>
-                <p class="text-muted">{{ $plan['description'] ?? 'No description available.' }}</p>
-                <a href="/contact" class="btn btn-outline-success rounded-pill mt-3">Get Started</a>
+            @php
+              $includedProducts = $plan['product_ids'] ?? [];
+              if (is_object($includedProducts)) {
+                  $includedProducts = (array) $includedProducts;
+              } elseif (!is_array($includedProducts)) {
+                  $includedProducts = [];
+              }
+
+              $includedValues = array_values($includedProducts);
+              $includedKeys = array_keys($includedProducts);
+              if (!empty($includedValues) && count(array_filter($includedValues, 'is_bool')) === count($includedValues)) {
+                  $includedProducts = $includedKeys;
+              } else {
+                  $includedProducts = $includedValues;
+              }
+            @endphp
+            <div class="card plan-card border-0 shadow-lg h-100 overflow-hidden plan-flip" data-plan-flip>
+              <div class="plan-flip-inner">
+                <div class="plan-flip-face plan-flip-front">
+                  <div class="image-wrapper position-relative">
+                    <img src="{{ $plan['image'] ?? asset('images/hero_bg.jpg') }}"
+                         class="card-img-top plan-image" alt="{{ $plan['name'] ?? 'Plan' }}">
+                    <button class="favorite-btn" onclick="togglePlanFavorite('{{ $id }}')">
+                      <i class="bi bi-star"></i>
+                    </button>
+                    <button class="flip-btn" type="button" data-flip-toggle>
+                      Details
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <h4 class="fw-bold text-primary">{{ $plan['name'] ?? 'Unnamed Plan' }}</h4>
+                    <h2 class="fw-bold text-success">${{ $plan['price'] ?? '0' }}</h2>
+                    <a href="/contact" class="btn btn-outline-success rounded-pill mt-3">Get Started</a>
+                  </div>
+                </div>
+                <div class="plan-flip-face plan-flip-back">
+                  <div class="card-body text-start">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <h5 class="fw-bold text-dark mb-0">Plan Details</h5>
+                      <button class="flip-btn flip-btn-outline" type="button" data-flip-toggle>
+                        Back
+                      </button>
+                    </div>
+                    <p class="text-muted">{{ $plan['description'] ?? 'No description available.' }}</p>
+                    @if (!empty($includedProducts))
+                      <div class="small text-muted">
+                        <div class="fw-semibold text-dark mb-2">Includes:</div>
+                        @foreach ($includedProducts as $productId)
+                          @php
+                            $product = $products[$productId] ?? null;
+                          @endphp
+                          @if ($product)
+                            <div class="d-flex align-items-start gap-2 mb-1">
+                              <i class="bi bi-check-circle-fill text-success"></i>
+                              <span>{{ $product['name'] ?? 'Unnamed Product' }}</span>
+                            </div>
+                          @endif
+                        @endforeach
+                      </div>
+                    @else
+                      <div class="small text-muted">No products included.</div>
+                    @endif
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -74,6 +128,51 @@
   .favorite-btn.active i {
     color: #fff;
   }
+  .plan-flip {
+    perspective: 1200px;
+  }
+  .plan-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
+  }
+  .plan-flip.is-flipped .plan-flip-inner {
+    transform: rotateY(180deg);
+  }
+  .plan-flip-face {
+    position: relative;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,0.95);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .plan-flip-back {
+    position: absolute;
+    inset: 0;
+    transform: rotateY(180deg);
+  }
+  .flip-btn {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    border: none;
+    border-radius: 999px;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.9);
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .flip-btn-outline {
+    position: static;
+    border: 1px solid #198754;
+    color: #198754;
+    background: #fff;
+  }
 </style>
 
 <script>
@@ -98,6 +197,17 @@
     });
   }
 
+  function initPlanFlips() {
+    document.querySelectorAll('[data-plan-flip]').forEach(card => {
+      card.querySelectorAll('[data-flip-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          card.classList.toggle('is-flipped');
+        });
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', updatePlanFavoriteIcons);
+  document.addEventListener('DOMContentLoaded', initPlanFlips);
 </script>
 @endsection

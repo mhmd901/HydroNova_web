@@ -1,0 +1,141 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty methods
+
+class User {
+  +id: int
+  +firebase_uid: string
+  +name: string
+  +email: string
+  +password: string
+  +email_verified_at: datetime
+}
+
+class Customer {
+  +uid: string
+  +full_name: string
+  +name: string
+  +email: string
+  +password_hash: string
+  +phone: string
+  +address: string
+  +city: string
+  +created_at: datetime
+  +updated_at: datetime
+}
+
+class Order {
+  +key: string
+  +id: string
+  +uid: string
+  +status: string
+  +full_name: string
+  +name: string
+  +email: string
+  +phone: string
+  +address: string
+  +city: string
+  +note: string
+  +subtotal: number
+  +delivery_fee: number
+  +total: number
+  +created_at: datetime
+}
+
+class OrderItem {
+  +id: string
+  +name: string
+  +price: number
+  +quantity: int
+  +subtotal: number
+  +image: string
+}
+
+class Product {
+  +name: string
+  +price: number
+  +description: string
+  +image_path: string
+  +image_url: string
+  +model_3d: string
+  +model_3d_url: string
+  +created_at: datetime
+  +updated_at: datetime
+}
+
+class Plan {
+  +name: string
+  +price: number
+}
+
+class Message {
+  +name: string
+  +email: string
+  +subject: string
+  +message: string
+  +timestamp: datetime
+}
+
+class AdminSettings {
+  +username: string
+  +password: string
+  +role: string
+}
+
+class SensorIngest {
+  +user_id: int
+  +device_id: string
+  +source: string
+  +ts: int
+  +payload: json
+  +created_at: datetime
+}
+
+class CartItem {
+  +id: string
+  +name: string
+  +price: number
+  +quantity: int
+  +image: string
+}
+
+Customer "1" -- "0..*" Order : places
+Order "1" -- "1..*" OrderItem : contains
+Product "1" -- "0..*" OrderItem : referenced by
+Customer "0..1" -- "0..*" Message : sends
+User "1" -- "0..*" SensorIngest : records
+Order "0..1" -- "0..*" CartItem : derived from
+
+note right of Customer
+  Stored in Firebase: customers/{uid}
+end note
+
+note right of Order
+  Stored in Firebase: orders/{orderKey}
+end note
+
+note right of OrderItem
+  Stored in Firebase: order_items/{orderKey}
+end note
+
+note right of Product
+  Stored in Firebase: products/{id}
+end note
+
+note right of Plan
+  Stored in Firebase: plans/{id}
+end note
+
+note right of Message
+  Stored in Firebase: messages/{id}
+end note
+
+note right of AdminSettings
+  Stored in Firebase: settings/admin
+end note
+
+note right of SensorIngest
+  Stored in Firebase: sensor_ingests/{id}
+end note
+@enduml

@@ -27,6 +27,10 @@
             padding-top: 90px;
         }
 
+        body.is-home {
+            padding-top: 0;
+        }
+
         .navbar-brand img {
             height: 42px;
         }
@@ -64,7 +68,7 @@
         }
     </style>
 </head>
-<body>
+<body class="{{ request()->routeIs('home') ? 'is-home' : '' }}">
     <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('home') }}">
@@ -132,21 +136,23 @@
     </nav>
 
     <main>
-        <div class="container pt-3">
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
+        @if (session('success') || session('auth_notice'))
+            <div class="container pt-3">
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
 
-            @if (session('auth_notice'))
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    {{ session('auth_notice') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-        </div>
+                @if (session('auth_notice'))
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        {{ session('auth_notice') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+            </div>
+        @endif
         @yield('content')
     </main>
 
