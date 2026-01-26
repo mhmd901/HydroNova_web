@@ -194,6 +194,9 @@
       @forelse ($planPreview as $plan)
         <div class="col-md-5 fade-up">
           <div class="hn-plan-card">
+            <div class="hn-plan-thumb">
+              <img src="{{ !empty($plan['image_path']) ? asset('storage/' . $plan['image_path']) : ($plan['image_url'] ?? asset('images/hero_bg.jpg')) }}" alt="{{ $plan['name'] ?? 'Plan' }}">
+            </div>
             <h4>{{ $plan['name'] ?? 'Plan' }}</h4>
             <p>{{ $plan['description'] ?? 'Flexible planting plan with guided targets.' }}</p>
             <ul>
@@ -535,6 +538,20 @@
     color: #ffffff;
     height: 100%;
     border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .hn-plan-thumb {
+    width: 100%;
+    height: 160px;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .hn-plan-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .hn-plan-card ul {

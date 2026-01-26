@@ -6,13 +6,15 @@
     <div class="card-body">
       <h3 class="fw-bold text-dark mb-4"><i class="bi bi-plus-circle"></i> Add New Plan</h3>
 
-      <form action="{{ route('admin.plans.store') }}" method="POST">
+      <form action="{{ route('admin.plans.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         @php
-          $selectedProducts = old('product_ids', []);
-          if (!is_array($selectedProducts)) {
-              $selectedProducts = [];
+          $selectedItems = old('product_items', []);
+          if (is_object($selectedItems)) {
+              $selectedItems = (array) $selectedItems;
+          } elseif (!is_array($selectedItems)) {
+              $selectedItems = [];
           }
         @endphp
 
@@ -32,24 +34,34 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Included Products</label>
-          <div class="border rounded p-2 bg-white" style="max-height: 220px; overflow:auto;">
+          <label class="form-label">Plan Image (optional)</label>
+          <input type="file" name="image" class="form-control" accept="image/*">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Included Products (set quantity)</label>
+          <div class="border rounded p-2 bg-white" style="max-height: 260px; overflow:auto;">
             @forelse ($products as $productId => $product)
-              <div class="form-check">
-                <input class="form-check-input"
-                       type="checkbox"
-                       name="product_ids[]"
-                       value="{{ $productId }}"
-                       id="product-{{ $loop->index }}"
-                       @checked(in_array($productId, $selectedProducts, true))>
-                <label class="form-check-label" for="product-{{ $loop->index }}">
+              @php
+                $qty = (int) ($selectedItems[$productId] ?? 0);
+              @endphp
+              <div class="d-flex align-items-center justify-content-between gap-2 py-1">
+                <label class="form-label mb-0" for="product-{{ $loop->index }}">
                   {{ $product['name'] ?? 'Unnamed Product' }}
                 </label>
+                <input class="form-control form-control-sm"
+                       style="max-width: 110px;"
+                       type="number"
+                       min="0"
+                       name="product_items[{{ $productId }}]"
+                       id="product-{{ $loop->index }}"
+                       value="{{ $qty }}">
               </div>
             @empty
               <div class="text-muted small">No products available.</div>
             @endforelse
           </div>
+          <div class="form-text">Use 0 to exclude a product.</div>
         </div>
 
         <div class="d-flex justify-content-between mt-4">

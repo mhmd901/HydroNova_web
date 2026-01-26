@@ -6,25 +6,25 @@
     <div class="card-body">
       <h3 class="fw-bold text-dark mb-4"><i class="bi bi-pencil-square"></i> Edit Plan</h3>
 
-      <form action="{{ route('admin.plans.update', $id) }}" method="POST">
+      <form action="{{ route('admin.plans.update', $id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
         @php
-          $selectedProducts = old('product_ids', $plan['product_ids'] ?? []);
-          if (is_object($selectedProducts)) {
-              $selectedProducts = (array) $selectedProducts;
-          } elseif (!is_array($selectedProducts)) {
-              $selectedProducts = [];
+          $selectedItems = old('product_items', $plan['product_items'] ?? ($plan['product_ids'] ?? []));
+          if (is_object($selectedItems)) {
+              $selectedItems = (array) $selectedItems;
+          } elseif (!is_array($selectedItems)) {
+              $selectedItems = [];
           }
 
-          $selectedValues = array_values($selectedProducts);
-          $selectedKeys = array_keys($selectedProducts);
-          $selectedProducts = [];
-          if (!empty($selectedValues) && count(array_filter($selectedValues, 'is_bool')) === count($selectedValues)) {
-              $selectedProducts = $selectedKeys;
-          } else {
-              $selectedProducts = $selectedValues;
+          $selectedValues = array_values($selectedItems);
+          $selectedKeys = array_keys($selectedItems);
+          $hasBoolMap = !empty($selectedValues)
+              && count(array_filter($selectedValues, 'is_bool')) === count($selectedValues);
+
+          if ($hasBoolMap) {
+              $selectedItems = array_fill_keys($selectedKeys, 1);
           }
         @endphp
 
@@ -46,24 +46,40 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Included Products</label>
-          <div class="border rounded p-2 bg-white" style="max-height: 220px; overflow:auto;">
+          <label class="form-label">Plan Image (optional)</label>
+          <input type="file" name="image" class="form-control" accept="image/*">
+          @if (!empty($plan['image_path']))
+            <div class="mt-2">
+              <img src="{{ asset('storage/' . $plan['image_path']) }}" alt="Current image" class="rounded border" style="width: 90px; height: 90px; object-fit: cover;">
+              <div class="text-muted small">Current image</div>
+            </div>
+          @endif
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Included Products (set quantity)</label>
+          <div class="border rounded p-2 bg-white" style="max-height: 260px; overflow:auto;">
             @forelse ($products as $productId => $product)
-              <div class="form-check">
-                <input class="form-check-input"
-                       type="checkbox"
-                       name="product_ids[]"
-                       value="{{ $productId }}"
-                       id="product-{{ $loop->index }}"
-                       @checked(in_array($productId, $selectedProducts, true))>
-                <label class="form-check-label" for="product-{{ $loop->index }}">
+              @php
+                $qty = (int) ($selectedItems[$productId] ?? 0);
+              @endphp
+              <div class="d-flex align-items-center justify-content-between gap-2 py-1">
+                <label class="form-label mb-0" for="product-{{ $loop->index }}">
                   {{ $product['name'] ?? 'Unnamed Product' }}
                 </label>
+                <input class="form-control form-control-sm"
+                       style="max-width: 110px;"
+                       type="number"
+                       min="0"
+                       name="product_items[{{ $productId }}]"
+                       id="product-{{ $loop->index }}"
+                       value="{{ $qty }}">
               </div>
             @empty
               <div class="text-muted small">No products available.</div>
             @endforelse
           </div>
+          <div class="form-text">Use 0 to exclude a product.</div>
         </div>
 
         <div class="d-flex justify-content-between mt-4">

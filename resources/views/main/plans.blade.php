@@ -14,26 +14,38 @@
         @foreach($plans as $id => $plan)
           <div class="col-md-4" data-id="{{ $id }}">
             @php
-              $includedProducts = $plan['product_ids'] ?? [];
-              if (is_object($includedProducts)) {
-                  $includedProducts = (array) $includedProducts;
-              } elseif (!is_array($includedProducts)) {
-                  $includedProducts = [];
+              $includedItems = $plan['product_items'] ?? ($plan['product_ids'] ?? []);
+              if (is_object($includedItems)) {
+                  $includedItems = (array) $includedItems;
+              } elseif (!is_array($includedItems)) {
+                  $includedItems = [];
               }
 
-              $includedValues = array_values($includedProducts);
-              $includedKeys = array_keys($includedProducts);
-              if (!empty($includedValues) && count(array_filter($includedValues, 'is_bool')) === count($includedValues)) {
-                  $includedProducts = $includedKeys;
+              $includedValues = array_values($includedItems);
+              $includedKeys = array_keys($includedItems);
+              $hasBoolMap = !empty($includedValues)
+                  && count(array_filter($includedValues, 'is_bool')) === count($includedValues);
+
+              if ($hasBoolMap) {
+                  $includedItems = array_fill_keys($includedKeys, 1);
+              } elseif (!array_is_list($includedItems)) {
+                  $normalizedItems = [];
+                  foreach ($includedItems as $productId => $qty) {
+                      $qty = (int) $qty;
+                      if ($qty > 0) {
+                          $normalizedItems[$productId] = $qty;
+                      }
+                  }
+                  $includedItems = $normalizedItems;
               } else {
-                  $includedProducts = $includedValues;
+                  $includedItems = array_fill_keys($includedItems, 1);
               }
             @endphp
             <div class="card plan-card border-0 shadow-lg h-100 overflow-hidden plan-flip" data-plan-flip>
               <div class="plan-flip-inner">
                 <div class="plan-flip-face plan-flip-front">
                   <div class="image-wrapper position-relative">
-                    <img src="{{ $plan['image'] ?? asset('images/hero_bg.jpg') }}"
+                    <img src="{{ !empty($plan['image_path']) ? asset('storage/' . $plan['image_path']) : ($plan['image_url'] ?? ($plan['image'] ?? asset('images/hero_bg.jpg'))) }}"
                          class="card-img-top plan-image" alt="{{ $plan['name'] ?? 'Plan' }}">
                     <button class="favorite-btn" onclick="togglePlanFavorite('{{ $id }}')">
                       <i class="bi bi-star"></i>
@@ -57,17 +69,22 @@
                       </button>
                     </div>
                     <p class="text-muted">{{ $plan['description'] ?? 'No description available.' }}</p>
-                    @if (!empty($includedProducts))
+                    @if (!empty($includedItems))
                       <div class="small text-muted">
                         <div class="fw-semibold text-dark mb-2">Includes:</div>
-                        @foreach ($includedProducts as $productId)
+                        @foreach ($includedItems as $productId => $qty)
                           @php
                             $product = $products[$productId] ?? null;
                           @endphp
                           @if ($product)
                             <div class="d-flex align-items-start gap-2 mb-1">
                               <i class="bi bi-check-circle-fill text-success"></i>
-                              <span>{{ $product['name'] ?? 'Unnamed Product' }}</span>
+                              <span>
+                                {{ $product['name'] ?? 'Unnamed Product' }}
+                                @if ($qty > 1)
+                                  <span class="text-muted">x{{ $qty }}</span>
+                                @endif
+                              </span>
                             </div>
                           @endif
                         @endforeach
