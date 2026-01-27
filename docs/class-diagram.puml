@@ -67,6 +67,10 @@ class Product {
 class Plan {
   +name: string
   +price: number
+  +description: string
+  +image_path: string
+  +image_url: string
+  +product_items: map<string,int>
 }
 
 class Message {
